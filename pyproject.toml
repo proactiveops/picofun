@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | \.nox
+)
+'''
+
+[tool.ruff]
+# Rules listed at https://github.com/charliermarsh/ruff#supported-rules
+select = ["B", "D", "E", "F", "G", "I", "N", "S", "W", "ANN" ,"BLE", "C4", "C90", "DTZ", "ERA", "PLW", "PT", "RET", "RUF", "SIM", "TRY", "UP"]
+ignore = ["D211", "D212", "E501", "F403", "F405", "ANN101"]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["B", "D", "E", "F", "G", "I", "N", "S", "W", "ANN" ,"BLE", "C4", "C90", "DTZ", "ERA", "PLW", "PT", "RET", "RUF", "SIM", "TRY", "UP"]
+unfixable = []

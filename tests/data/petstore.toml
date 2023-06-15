@@ -1,0 +1,117 @@
+openapi = "3.0.0"
+
+[info]
+version = "1.0.0"
+title = "Swagger Petstore"
+
+  [info.license]
+  name = "MIT"
+
+[[servers]]
+url = "http://petstore.swagger.io/v1"
+
+[paths."/pets".get]
+summary = "List all pets"
+operationId = "listPets"
+tags = [ "pets" ]
+
+  [[paths."/pets".get.parameters]]
+  name = "limit"
+  in = "query"
+  description = "How many items to return at one time (max 100)"
+  required = false
+
+    [paths."/pets".get.parameters.schema]
+    type = "integer"
+    maximum = 100
+    format = "int32"
+
+[paths."/pets".get.responses.200]
+description = "A paged array of pets"
+
+[paths."/pets".get.responses.200.headers.x-next]
+description = "A link to the next page of responses"
+
+  [paths."/pets".get.responses.200.headers.x-next.schema]
+  type = "string"
+
+[paths."/pets".get.responses.200.content."application/json".schema]
+"$ref" = "#/components/schemas/Pets"
+
+[paths."/pets".get.responses.default]
+description = "unexpected error"
+
+[paths."/pets".get.responses.default.content."application/json".schema]
+"$ref" = "#/components/schemas/Error"
+
+[paths."/pets".post]
+summary = "Create a pet"
+operationId = "createPets"
+tags = [ "pets" ]
+
+[paths."/pets".post.responses.201]
+description = "Null response"
+
+[paths."/pets".post.responses.default]
+description = "unexpected error"
+
+[paths."/pets".post.responses.default.content."application/json".schema]
+"$ref" = "#/components/schemas/Error"
+
+[paths."/pets/{petId}".get]
+summary = "Info for a specific pet"
+operationId = "showPetById"
+tags = [ "pets" ]
+
+  [[paths."/pets/{petId}".get.parameters]]
+  name = "petId"
+  in = "path"
+  required = true
+  description = "The id of the pet to retrieve"
+
+    [paths."/pets/{petId}".get.parameters.schema]
+    type = "string"
+
+[paths."/pets/{petId}".get.responses.200]
+description = "Expected response to a valid request"
+
+[paths."/pets/{petId}".get.responses.200.content."application/json".schema]
+"$ref" = "#/components/schemas/Pet"
+
+[paths."/pets/{petId}".get.responses.default]
+description = "unexpected error"
+
+[paths."/pets/{petId}".get.responses.default.content."application/json".schema]
+"$ref" = "#/components/schemas/Error"
+
+[components.schemas.Pet]
+type = "object"
+required = [ "id", "name" ]
+
+[components.schemas.Pet.properties.id]
+type = "integer"
+format = "int64"
+
+[components.schemas.Pet.properties.name]
+type = "string"
+
+[components.schemas.Pet.properties.tag]
+type = "string"
+
+[components.schemas.Pets]
+type = "array"
+maxItems = 100
+
+  [components.schemas.Pets.items]
+  "$ref" = "#/components/schemas/Pet"
+
+[components.schemas.Error]
+type = "object"
+required = [ "code", "message" ]
+
+[components.schemas.Error.properties.code]
+type = "integer"
+format = "int32"
+
+[components.schemas.Error.properties.message]
+type = "string"

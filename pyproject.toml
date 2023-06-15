@@ -1,0 +1,84 @@
+[project]
+name = "picofun"
+authors = [
+    {name = "Dave Hall", email = "skwashd@gmail.com"},
+]
+description = "PicoFun AWS Lambda generator"
+
+dependencies = [
+  "black==23.7.0",
+  "jinja2==3.1.2",
+  "PyYAML==6.0.1",
+  "requests==2.31.0",
+  "tomli==2.0.1",
+  "typer==0.9.0",
+]
+
+license = {file = "LICENSE.txt"}
+readme = "README.md"
+
+dynamic = ["version"]
+
+[project.optional-dependencies]
+
+dev = [
+  "pytest==7.4.0",
+  "pytest-cov==4.1.0",
+  "pytest-mock==3.11.1",
+  "ruff==0.0.284",
+]
+
+build = [
+  "build==0.10.0",
+  "twine==4.0.2",
+]
+
+[build-system]
+requires = [
+  "setuptools==68.1.2",
+  "setuptools-git-versioning==1.13.5",
+  "wheel==0.41.1",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["picofun"]
+
+[tool.setuptools-git-versioning]
+enabled = true
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | \.nox
+)
+'''
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report term-missing"
+
+[tool.ruff]
+# Rules listed at https://github.com/charliermarsh/ruff#supported-rules
+select = ["B", "D", "E", "F", "G", "I", "N", "S", "W", "ANN" ,"BLE", "C4", "C90", "DTZ", "ERA", "PLW", "PT", "RET", "RUF", "SIM", "TRY", "UP"]
+ignore = ["D211", "D212", "E501", "F403", "F405", "ANN101"]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["B", "D", "E", "F", "G", "I", "N", "S", "W", "ANN" ,"BLE", "C4", "C90", "DTZ", "ERA", "PLW", "PT", "RET", "RUF", "SIM", "TRY", "UP"]
+unfixable = []
+
+[tool.ruff.per-file-ignores]
+"tests/*" = ["S101", "S108"]

@@ -1,0 +1,4 @@
+invalid_property = "this will fail"
+output_dir = "tests/data/output"
+layers = ["arn:aws:lambda:us-east-1:012345678910:layer:example:1"]
+template_path = "tests/data/templates"

@@ -1,0 +1,112 @@
+locals {
+
+  lambda_layer_path = "${local.tmp_path}/lambda_layer-{{ namespace }}"
+  temp_path         = "${path.root}/.terraform/tmp"
+
+  functions = [
+  {% for lambda in lambdas -%}
+      "{{ lambda }}",
+  {% endfor %}]
+
+  subnet_ids = [
+  {% for subnet in subnets -%}
+    "{{ subnet }}",
+  {% endfor %}]
+}
+
+data "aws_subnet" "this" {
+  for_each = toset(local.subnet_ids)
+
+  id = each.value
+}
+
+/*
+resource "null_resource" "lambda_layer" {
+  provisioner "local-exec" {
+    command = "pip install -r ${var.lambda_root}/requirements.txt -t ${local.lambda_layer_path}"
+  }
+  
+  triggers = {
+    once = "${timestamp()}"
+  }
+}
+
+data "archive_file" "lambda_layer" {
+  depends_on = [null_resource.lambda_layer]
+
+  source_dir  = ${local.lambda_layer_path}
+  output_path = "${module.path}/lambda_layer-{{ namespace }}.zip"
+  type        = "zip"
+}
+
+resource "aws_lambda_layer_version" "this" {
+  filename            = data.archive_file.lambda_layer.output_path
+  layer_name          = "{{ namespace }}"
+  source_code_hash    = filebase64sha256(data.archive_file.lambda_layer.output_path)
+  compatible_runtimes = ["python3.10"]
+}
+*/
+
+data "archive_file" "lambda_function" {
+  for_each = toset(local.functions)
+
+  source_file = "${path.module}/${each.value}"
+  output_path = "${local.temp_path}-${each.value}.zip"
+  type        = "zip"
+}
+
+resource "aws_lambda_function" "this" {
+  for_each = toset(local.functions)
+
+  filename         = data.archive_file.lambda_function[each.value].output_path
+  function_name    = "pf-{{ namespace }}-${trimsuffix(each.value, ".py")}"
+  role             = aws_iam_role.lambda.arn
+  handler          = "${trimsuffix(each.value, ".py")}.handler"
+  runtime          = "python3.10"
+  source_code_hash = data.archive_file.lambda_function[each.value].output_base64sha256
+  timeout          = 60
+
+  vpc_config {
+    subnet_ids = data.aws_subnet.this[*].id
+  }
+
+  tags = merge(
+    {
+      "generated_by" = "picofun"
+    },
+    { 
+    {% for tag in tags -%}
+      {{ tag }} = "{{ tags[tag] }}",
+    {% endfor %}
+    }
+  )
+}
+
+resource "aws_iam_role" "lambda" {
+  name = "pf-{{ namespace }}"
+
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+}
+
+data "aws_iam_policy_document" "lambda_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+    principals {
+      identifiers = ["lambda.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = aws_iam_role.iam_for_lambda.name
+}
+
+resource "aws_cloudwatch_log_group" "lambda" {
+  for_each = toset(local.functions)
+
+  name              = "/aws/lambda/${aws_lambda_function.this[each.key].function_name}"
+  retention_in_days = 14
+}

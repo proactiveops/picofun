@@ -1,0 +1,172 @@
+variable "tags" {
+  type        = map(string)
+  description = "Tags to apply to all resources"
+  default     = {}
+}
+
+locals {
+
+  lambda_layer_path = "${local.temp_path}/lambda_layer_{{ namespace }}"
+  temp_path         = "${path.root}/.terraform/tmp"
+
+  layers = [
+    aws_lambda_layer_version.this.arn,
+    "arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:41",
+  {% for layer in layers -%}
+    "{{ layer }}",
+  {% endfor %}
+  ]
+
+  functions = [
+  {% for lambda in lambdas -%}
+      "{{ lambda }}",
+  {% endfor %}]
+{% if subnets|length > 0 %}
+  subnet_ids = [
+  {% for subnet in subnets -%}
+    "{{ subnet }}",
+  {% endfor %}]
+{% endif %}
+  tags = merge(
+    {
+      "generated_by" = "picofun"
+    },{% if tags|length > 0 %}
+    { {% for tag in tags -%}
+      {{ tag }} = "{{ tags[tag] }}",
+    {% endfor %} },{%- endif %}
+    var.tags
+  )
+}
+{% if subnets|length > 0 %}
+data "aws_subnet" "this" {
+  for_each = toset(local.subnet_ids)
+
+  id = each.value
+}
+
+resource "aws_vpc_security_group" "lambda" {
+  count = length(data.aws_subnet.this) > 0 ? 1 : 0
+
+  name        = "pf-{{ namespace }}-lambdas"
+  description = "Security group for pf-{{ namespace }} lambda functions"
+  vpc_id      = data.aws_subnet.this[0].vpc_id
+
+  tags = local.tags
+}
+{% endif %}
+
+resource "null_resource" "layer" {
+  provisioner "local-exec" {
+    command = <<EOT
+      rm -rf ${local.lambda_layer_path}
+      mkdir -p ${local.lambda_layer_path}/python
+      cp -a ${path.module}/layer/. ${local.lambda_layer_path}/python
+      pip3.10 install -r ${local.lambda_layer_path}/python/requirements.txt --target ${local.lambda_layer_path}/python
+    EOT
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
+}
+
+data "archive_file" "layer" {
+  depends_on = [null_resource.layer]
+
+  source_dir  = local.lambda_layer_path
+  output_path = "${local.temp_path}/layer_{{ namespace }}.zip"
+  type        = "zip"
+}
+
+resource "aws_lambda_layer_version" "this" {
+  depends_on = [data.archive_file.layer]
+
+  filename            = data.archive_file.layer.output_path
+  layer_name          = "{{ namespace }}"
+  source_code_hash    = data.archive_file.layer.output_base64sha256
+
+  compatible_runtimes      = ["python3.10"]
+  compatible_architectures = ["x86_64"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+data "archive_file" "lambda" {
+  for_each = toset(local.functions)
+
+  source_file = "${path.module}/lambdas/${each.value}.py"
+  output_path = "${local.temp_path}/lambda_${each.value}.zip"
+  type        = "zip"
+}
+
+resource "aws_lambda_function" "this" {
+  for_each = toset(local.functions)
+
+  filename         = data.archive_file.lambda[each.value].output_path
+  function_name    = "pf_{{ namespace }}_${each.value}"
+  role             = aws_iam_role.lambda.arn
+  handler          = "${each.value}.handler"
+  runtime          = "python3.10"
+  source_code_hash = data.archive_file.lambda[each.value].output_base64sha256
+  timeout          = 10
+  layers           = local.layers
+{% if subnets|length > 0 %}
+  "vpc_config" {
+      security_group_ids = aws_vpc_security_group.lambda[*].id
+      subnet_ids         = data.aws_subnet.this[*].id
+  }
+{% endif %}
+  tags = local.tags
+}
+
+resource "aws_iam_role" "lambda" {
+  name = "pf-{{ namespace }}"
+
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+
+  tags = local.tags
+}
+
+data "aws_iam_policy_document" "lambda_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+    principals {
+      identifiers = ["lambda.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = aws_iam_role.lambda.name
+}
+{% if subnets|length > 0 %}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess"
+  role       = aws_iam_role.lambda.name
+}
+
+{% endif %}
+resource "aws_cloudwatch_log_group" "lambda" {
+  for_each = toset(local.functions)
+
+  name              = "/aws/lambda/${aws_lambda_function.this[each.key].function_name}"
+  retention_in_days = 14
+
+  tags = local.tags
+}
+
+output "lambda_function_arns" {
+  description = "ARNs of the lambda functions"
+  value       = [for l in aws_lambda_function.this : l.arn]
+}
+
+output "iam_role_arn" {
+  description = "ARN of the IAM role used by the lambda functions"
+  value       = aws_iam_role.lambda.arn
+}

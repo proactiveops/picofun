@@ -17,5 +17,11 @@ def test_template_load() -> None:
 def test_template_load_missing() -> None:
     """Test loading a missing template."""
     template = picofun.template.Template("tests/data")
-    with pytest.raises(jinja2.exceptions.TemplateNotFound):
+    with pytest.raises(FileNotFoundError):
         template.get("missing.j2")
+
+
+def test_template_render() -> None:
+    """Test rendering a template."""
+    template = picofun.template.Template("tests/data/templates")
+    assert template.render("empty.j2") == ""

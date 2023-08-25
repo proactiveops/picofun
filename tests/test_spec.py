@@ -4,79 +4,8 @@
 import pytest
 import requests
 
-from picofun.errors import DownloadSpecError, InvalidSpecError
-from picofun.spec import JSONSpecParser, Spec, SpecParser, YAMLSpecParser
-
-
-def test_spec_parser() -> None:
-    """Test the SpecParser interface."""
-    with pytest.raises(TypeError):
-        SpecParser()
-
-
-def test_json_spec_parser() -> None:
-    """Test the JSONSpecParser class."""
-    parser = JSONSpecParser()
-    assert parser.parse('{"foo": "bar"}') == {"foo": "bar"}
-
-
-def test_json_spec_parser_invalid_json() -> None:
-    """Test the JSONSpecParser class with invalid JSON."""
-    parser = JSONSpecParser()
-    with pytest.raises(InvalidSpecError):
-        parser.parse('{"foo": "bar"')
-
-
-def test_yaml_spec_parser() -> None:
-    """Test the YAMLSpecParser class."""
-    parser = YAMLSpecParser()
-    assert parser.parse("foo: bar") == {"foo": "bar"}
-
-
-def test_yaml_spec_parser_invalid_yaml() -> None:
-    """Test the YAMLSpecParser class with invalid YAML."""
-    parser = YAMLSpecParser()
-    with pytest.raises(InvalidSpecError):
-        parser.parse("foo: b: a: r")
-
-
-def test_spec_json() -> None:
-    """Test the Spec class with JSON."""
-    spec = Spec("tests/data/petstore.json")
-    assert spec.parse()["servers"][0]["url"] == "http://petstore.swagger.io/v1"
-
-
-def test_spec_json_invalid_json() -> None:
-    """Test the Spec class with invalid JSON."""
-    spec = Spec("tests/data/broken.json")
-    with pytest.raises(InvalidSpecError):
-        spec.parse()
-
-
-def test_spec_yaml() -> None:
-    """Test the Spec class with YAML."""
-    spec = Spec("tests/data/petstore.yaml")
-    assert spec.parse()["servers"][0]["url"] == "http://petstore.swagger.io/v1"
-
-
-def test_spec_yaml_invalid_yaml() -> None:
-    """Test the Spec class with invalid YAML."""
-    spec = Spec("tests/data/broken.yaml")
-    with pytest.raises(InvalidSpecError):
-        spec.parse()
-
-
-def test_spec_unknown_file_type() -> None:
-    """Test the Spec class with an unknown file type."""
-    spec = Spec("tests/data/lambda.png")
-    with pytest.raises(InvalidSpecError):
-        spec.parse()
-
-
-def test_spec_unknown_file() -> None:
-    """Test the Spec class with an unknown file."""
-    with pytest.raises(FileNotFoundError):
-        Spec("tests/data/unknown")
+import picofun.errors
+import picofun.spec
 
 
 def mock_requests_get_spec(
@@ -118,6 +47,77 @@ def mock_requests_get_spec(
     return MockResponse("", 404)
 
 
+def test_spec_parser() -> None:
+    """Test the SpecParser interface."""
+    with pytest.raises(TypeError):
+        picofun.spec.SpecParser()
+
+
+def test_json_spec_parser() -> None:
+    """Test the JSONSpecParser class."""
+    parser = picofun.spec.JSONSpecParser()
+    assert parser.parse('{"foo": "bar"}') == {"foo": "bar"}
+
+
+def test_json_spec_parser_invalid_json() -> None:
+    """Test the JSONSpecParser class with invalid JSON."""
+    parser = picofun.spec.JSONSpecParser()
+    with pytest.raises(picofun.errors.InvalidSpecError):
+        parser.parse('{"foo": "bar"')
+
+
+def test_yaml_spec_parser() -> None:
+    """Test the YAMLSpecParser class."""
+    parser = picofun.spec.YAMLSpecParser()
+    assert parser.parse("foo: bar") == {"foo": "bar"}
+
+
+def test_yaml_spec_parser_invalid_yaml() -> None:
+    """Test the YAMLSpecParser class with invalid YAML."""
+    parser = picofun.spec.YAMLSpecParser()
+    with pytest.raises(picofun.errors.InvalidSpecError):
+        parser.parse("foo: b: a: r")
+
+
+def test_spec_json() -> None:
+    """Test the Spec class with JSON."""
+    spec = picofun.spec.Spec("tests/data/petstore.json")
+    assert spec.parse()["servers"][0]["url"] == "http://petstore.swagger.io/v1"
+
+
+def test_spec_json_invalid_json() -> None:
+    """Test the Spec class with invalid JSON."""
+    spec = picofun.spec.Spec("tests/data/broken.json")
+    with pytest.raises(picofun.errors.InvalidSpecError):
+        spec.parse()
+
+
+def test_spec_yaml() -> None:
+    """Test the Spec class with YAML."""
+    spec = picofun.spec.Spec("tests/data/petstore.yaml")
+    assert spec.parse()["servers"][0]["url"] == "http://petstore.swagger.io/v1"
+
+
+def test_spec_yaml_invalid_yaml() -> None:
+    """Test the Spec class with invalid YAML."""
+    spec = picofun.spec.Spec("tests/data/broken.yaml")
+    with pytest.raises(picofun.errors.InvalidSpecError):
+        spec.parse()
+
+
+def test_spec_unknown_file_type() -> None:
+    """Test the Spec class with an unknown file type."""
+    spec = picofun.spec.Spec("tests/data/lambda.png")
+    with pytest.raises(picofun.errors.InvalidSpecError):
+        spec.parse()
+
+
+def test_spec_unknown_file() -> None:
+    """Test the Spec class with an unknown file."""
+    with pytest.raises(FileNotFoundError):
+        picofun.spec.Spec("tests/data/unknown")
+
+
 def test_spec_http() -> None:
     """Test the Spec class with a URL."""
     import requests
@@ -125,7 +125,7 @@ def test_spec_http() -> None:
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setattr(requests, "get", mock_requests_get_spec)
 
-    spec = Spec("https://petstore3.swagger.io/api/v3/openapi.yaml")
+    spec = picofun.spec.Spec("https://petstore3.swagger.io/api/v3/openapi.yaml")
     assert spec.parse()["servers"][0]["url"] == "http://petstore.swagger.io/v1"
 
 
@@ -136,8 +136,8 @@ def test_spec_http_missing() -> None:
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setattr(requests, "get", mock_requests_get_spec)
 
-    with pytest.raises(DownloadSpecError):
-        Spec("https://example.swagger.io/api/v3/missing.json")
+    with pytest.raises(picofun.errors.DownloadSpecError):
+        picofun.spec.Spec("https://example.swagger.io/api/v3/missing.json")
 
 
 def test_spec_http_invalid() -> None:
@@ -147,5 +147,5 @@ def test_spec_http_invalid() -> None:
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setattr(requests, "get", mock_requests_get_spec)
 
-    with pytest.raises(DownloadSpecError):
-        Spec("httpinvalid://example.com/")
+    with pytest.raises(picofun.errors.DownloadSpecError):
+        picofun.spec.Spec("httpinvalid://example.com/")

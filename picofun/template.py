@@ -1,12 +1,13 @@
 """Template loader for Jinja2 templates."""
 import os
+import typing
 
-from jinja2 import Environment, FileSystemLoader, Template
+import jinja2
 
 
 class Template:
 
-    """Loads Jinja2 templates."""
+    """Manages Jinja2 templates."""
 
     def __init__(self, base_path: str | None = "") -> None:
         """Initialise TemplateLoader."""
@@ -15,10 +16,24 @@ class Template:
 
         path = os.path.realpath(base_path)
 
-        self._environment = Environment(  # noqa: S701 We're not generating HTML
-            loader=FileSystemLoader(path)
+        self._environment = (
+            jinja2.Environment(  # noqa: S701 We're not generating HTML # nosec
+                loader=jinja2.FileSystemLoader(path)
+            )
         )
 
-    def get(self, filename: str) -> Template:
+        self.templates = {}
+
+    def get(self, filename: str) -> jinja2.Template:
         """Get a template by filename."""
-        return self._environment.get_template(filename)
+        if filename not in self.templates:
+            try:
+                self.templates[filename] = self._environment.get_template(filename)
+            except jinja2.exceptions.TemplateNotFound as e:
+                raise FileNotFoundError(e.name) from e
+
+        return self.templates[filename]
+
+    def render(self, filename: str, **kwargs: dict[str : typing.Any]) -> str:
+        """Render a template by filename."""
+        return self.get(filename).render(**kwargs)

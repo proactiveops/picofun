@@ -1,0 +1,33 @@
+"""Generated AWS Lambda function for making an API call."""
+
+from typing import Any
+
+import requests
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+import picorun
+
+{% if preprocessor %}import {{preprocessor}}
+{% endif %}{% if postprocessor %}import {{postprocessor}}
+{% endif %}
+logger = Logger()
+
+
+@logger.inject_lambda_context
+def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
+    """{{ details.summary | default('') }}."""
+    properties = picorun.ApiRequestArgs(**event)
+    {% if preprocessor_handler %}properties = {{preprocessor_handler}}(args){% endif %}
+    url = "{{ base_url }}{{ path }}".format(**properties.path)
+
+    timeout = context.get_remaining_time_in_millis() - 1000
+    response = requests.{{ method }}(url, timeout=timeout, **properties.to_kwargs())
+    out = picorun.ApiResponse(response)
+    {% if postprocessor_handler %}response = {{postprocessor_handler}}(out){% endif %}
+
+    if response.status_code >= 400:
+        logger.error("Error %d: %s", response.status_code, response.text)
+        raise picorun.ApiError(response.text, response.status_code)
+
+    return out.asdict()

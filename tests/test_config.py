@@ -1,6 +1,8 @@
 """Test picofun Configuration loader."""
 
 import os
+import random
+import string
 import tempfile
 
 import pytest
@@ -262,3 +264,38 @@ def test_asdict_empty() -> None:
     config = picofun.config.Config("tests/data/empty.toml")
 
     assert config.asdict()["layers"] == []
+
+
+def test_get_config_file() -> None:
+    """Test getting the path to the config file."""
+    path = os.path.join(os.path.dirname(__file__), "data")
+    config = picofun.config.Config(path)
+    assert config._config_file == f"{path}/picofun.toml"
+
+
+def test_get_config_file_empty() -> None:
+    """Test getting the path to the config file with an empty argument."""
+    path = os.getcwd()
+    config = picofun.config.Config()
+    assert config._config_file == f"{path}/picofun.toml"
+
+
+def test_get_config_file_invalid() -> None:
+    """Test not getting the config file from an invalid path."""
+    with pytest.raises(picofun.errors.ConfigFileNotFoundError):
+        picofun.config.Config("/invalid/")
+
+
+def test_setattr_output_dir_mkdir() -> None:
+    """Test creating the output directory."""
+    config = picofun.config.Config("tests/data/empty.toml")
+
+    tmp = os.path.realpath(
+        f'/tmp/picofun_tests_{"".join(random.sample(string.ascii_letters + string.digits, 16))}'
+    )
+
+    assert not os.path.exists(tmp)
+    config.output_dir = tmp
+    assert os.path.exists(tmp)
+
+    os.rmdir(tmp)

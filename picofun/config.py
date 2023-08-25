@@ -1,7 +1,7 @@
 """Configuration handling."""
 
 import os
-from typing import Any, ClassVar
+import typing
 
 import tomli as toml
 
@@ -12,7 +12,8 @@ class Config:
 
     """Configuration management class."""
 
-    _attrs: ClassVar[dict[str:Any]] = {
+    _attrs: typing.ClassVar[dict[str : typing.Any]] = {
+        "_config_file": str,
         "bundle": str,
         "layers": list,
         "output_dir": str,
@@ -23,16 +24,30 @@ class Config:
         "template_path": str,
     }
 
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: typing.Optional[str] = None) -> None:
         """
         Initialize the configuration.
 
         :param file_path: The path to the configuration file.
         """
         self.set_defaults()
-        self.load_from_file(file_path)
+        self._config_file = self._get_config_file(file_path)
+        self.load_from_file(self._config_file)
 
-    def __getattr__(self, name: str) -> str | list | dict[str, Any]:
+    def _get_config_file(self, config_file: typing.Optional[str] = None) -> str:
+        """Get the path to the configuration file."""
+        if not config_file:
+            config_file = os.getcwd()
+
+        if os.path.isdir(config_file):
+            config_file = os.path.join(config_file, "picofun.toml")
+
+        if os.path.isfile(config_file):
+            return config_file
+
+        raise picofun.errors.ConfigFileNotFoundError(config_file)
+
+    def __getattr__(self, name: str) -> str | list | dict[str, typing.Any]:
         """
         Get a configuration value.
 
@@ -42,7 +57,7 @@ class Config:
         if name not in self._attrs:
             raise picofun.errors.UnknownConfigValueError(name)
 
-    def __setattr__(self, name: str, value: str | list | dict[str, Any]) -> None:
+    def __setattr__(self, name: str, value: str | list | dict[str, typing.Any]) -> None:
         """
         Set a configuration value.
 
@@ -63,6 +78,9 @@ class Config:
 
         if name == "output_dir":
             value = self._fix_target_path(value)
+            # Ensure the path exists
+            if not os.path.exists(value):
+                os.makedirs(value, exist_ok=True)
 
         self.__dict__[name] = value
 
@@ -99,7 +117,7 @@ class Config:
 
         self.merge(**file_config)
 
-    def merge(self, **kwargs: dict[str, Any]) -> None:
+    def merge(self, **kwargs: dict[str, typing.Any]) -> None:
         """
         Merge the configuration with the CLI arguments.
 
@@ -115,6 +133,7 @@ class Config:
     def set_defaults(self) -> None:
         """Set the default values for the configuration."""
         defaults = {
+            "_config_file": "",
             "bundle": None,
             "layers": [],
             "output_dir": os.path.realpath(os.path.join(os.getcwd(), "output")),
@@ -128,7 +147,7 @@ class Config:
         for key in defaults:
             self.__dict__[key] = defaults[key]
 
-    def asdict(self) -> dict[str, Any]:
+    def asdict(self) -> dict[str, typing.Any]:
         """
         Convert the configuration to a dictionary.
 

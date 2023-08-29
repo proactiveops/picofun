@@ -67,12 +67,12 @@ class Config:
         if name not in self._attrs:
             raise picofun.errors.UnknownConfigValueError(name)
 
+        # First allow layers to be set as a comma separated string and convert it to a list
         if name == "layers" and isinstance(value, str):
             value = [raw.strip() for raw in value.split(",")]
             if value == [""]:
                 value = []
 
-        # First allow layers to be set as a comma separated string and convert it to a list
         if not isinstance(value, self._attrs[name]):
             raise picofun.errors.InvalidConfigTypeError(name, value, self._attrs[name])
 
@@ -91,10 +91,7 @@ class Config:
         :param output_dir: The name of the output directory
         :return: The absolute path to the output directory
         """
-        if not output_dir:
-            output_dir = ""
-
-        if output_dir.startswith("/"):
+        if os.path.isabs(output_dir):
             return os.path.realpath(output_dir)
 
         return os.path.realpath(os.path.join(os.getcwd(), output_dir))

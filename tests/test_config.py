@@ -151,7 +151,7 @@ def test_fix_target_path_none() -> None:
     """Test fixing the target path with an empty path."""
     config = picofun.config.Config("tests/data/config.toml")
 
-    assert config._fix_target_path(None) == os.path.realpath(os.getcwd())
+    assert config._fix_target_path() == os.path.realpath(os.getcwd())
 
 
 def test_fix_target_path_missing() -> None:

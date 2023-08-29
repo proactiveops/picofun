@@ -11,7 +11,7 @@ class Template:
 
     def __init__(self, base_path: str | None = "") -> None:
         """Initialise TemplateLoader."""
-        if len(base_path) > 0 and base_path[0] != "/":
+        if not os.path.isabs(base_path):
             base_path = os.path.join(os.getcwd(), base_path)
 
         path = os.path.realpath(base_path)

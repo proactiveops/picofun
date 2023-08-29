@@ -67,12 +67,12 @@ class Config:
         if name not in self._attrs:
             raise picofun.errors.UnknownConfigValueError(name)
 
+        # First allow layers to be set as a comma separated string and convert it to a list
         if name == "layers" and isinstance(value, str):
             value = [raw.strip() for raw in value.split(",")]
             if value == [""]:
                 value = []
 
-        # First allow layers to be set as a comma separated string and convert it to a list
         if not isinstance(value, self._attrs[name]):
             raise picofun.errors.InvalidConfigTypeError(name, value, self._attrs[name])
 

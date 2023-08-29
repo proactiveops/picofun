@@ -91,10 +91,7 @@ class Config:
         :param output_dir: The name of the output directory
         :return: The absolute path to the output directory
         """
-        if not output_dir:
-            output_dir = ""
-
-        if output_dir.startswith("/"):
+        if os.path.isabs(output_dir):
             return os.path.realpath(output_dir)
 
         return os.path.realpath(os.path.join(os.getcwd(), output_dir))

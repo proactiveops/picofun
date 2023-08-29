@@ -26,7 +26,7 @@ class Layer:
         if self._config.bundle and os.path.isdir(self._config.bundle):
             shutil.copytree(self._config.bundle, layer_dir)
 
-        # Handle requriements.txt updates
+        # Handle requirements.txt updates
         requirements_file = os.path.join(layer_dir, "requirements.txt")
         requirements = picofun.requirements_manager.RequirementsManager(
             requirements_file

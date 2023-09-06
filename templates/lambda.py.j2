@@ -18,7 +18,7 @@ logger = Logger()
 def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
     """{{ details.summary | default('') }}."""
     properties = picorun.ApiRequestArgs(**event)
-    {% if preprocessor_handler %}properties = {{preprocessor_handler}}(args){% endif %}
+    {% if preprocessor_handler %}properties = {{preprocessor_handler}}(properties){% endif %}
     url = "{{ base_url }}{{ path }}".format(**properties.path)
 
     timeout = context.get_remaining_time_in_millis() - 1000

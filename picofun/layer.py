@@ -7,7 +7,7 @@ import picofun.requirements_manager
 
 logger = logging.getLogger(__name__)
 
-PICORUN_VERSION = "0.0.3"
+PICORUN_VERSION = "0.1.0"
 
 
 class Layer:

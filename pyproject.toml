@@ -25,7 +25,7 @@ dev = [
   "pytest==7.4.1",
   "pytest-cov==4.1.0",
   "pytest-mock==3.11.1",
-  "ruff==0.0.287",
+  "ruff==0.0.289",
 ]
 
 build = [

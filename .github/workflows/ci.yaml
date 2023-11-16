@@ -23,7 +23,7 @@ jobs:
 
       - name: ruff
         run: |
-          ruff --format=github .
+          ruff --output-format=github .
 
       - name: black
         run: |

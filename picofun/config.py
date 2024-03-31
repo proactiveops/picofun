@@ -9,7 +9,6 @@ import picofun.errors
 
 
 class Config:
-
     """Configuration management class."""
 
     _attrs: typing.ClassVar[dict[str : typing.Any]] = {

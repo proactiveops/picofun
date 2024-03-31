@@ -1,4 +1,5 @@
 """Terraform generator."""
+
 import logging
 import os
 
@@ -9,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class TerraformGenerator:
-
     """Terraform generator."""
 
     def __init__(

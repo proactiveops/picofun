@@ -1,4 +1,5 @@
 """Spec file handler."""
+
 import abc
 import errno
 import json
@@ -11,7 +12,6 @@ import picofun.errors
 
 
 class SpecLoader(abc.ABC):  # pragma: no cover
-
     """Loads an OpenAPI spec file."""
 
     @abc.abstractmethod
@@ -26,7 +26,6 @@ class SpecLoader(abc.ABC):  # pragma: no cover
 
 
 class FileSpecLoader(SpecLoader):
-
     """Loads an OpenAPI spec file from disk."""
 
     def load(self, location: str) -> str:
@@ -45,7 +44,6 @@ class FileSpecLoader(SpecLoader):
 
 
 class HTTPSpecLoader(SpecLoader):
-
     """Loads an OpenAPI spec file from a URL."""
 
     def load(self, location: str) -> str:
@@ -68,7 +66,6 @@ class HTTPSpecLoader(SpecLoader):
 
 
 class SpecParser(abc.ABC):  # pragma: no cover
-
     """Parses an OpenAPI spec file."""
 
     @abc.abstractmethod
@@ -84,7 +81,6 @@ class SpecParser(abc.ABC):  # pragma: no cover
 
 
 class JSONSpecParser(SpecParser):
-
     """Parses an OpenAPI spec file in JSON format."""
 
     def parse(self, content: str) -> dict:
@@ -102,7 +98,6 @@ class JSONSpecParser(SpecParser):
 
 
 class YAMLSpecParser(SpecParser):
-
     """Parses an OpenAPI spec file in YAML format."""
 
     def parse(self, content: str) -> dict:
@@ -120,7 +115,6 @@ class YAMLSpecParser(SpecParser):
 
 
 class Spec:
-
     """Spec file handler."""
 
     def __init__(self, location: str) -> None:

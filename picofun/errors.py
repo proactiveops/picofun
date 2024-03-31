@@ -6,7 +6,6 @@ import requests
 
 
 class ConfigFileNotFoundError(FileNotFoundError):
-
     """Exception thrown when the config file cannot be found."""
 
     def __init__(self, path: str) -> None:
@@ -19,7 +18,6 @@ class ConfigFileNotFoundError(FileNotFoundError):
 
 
 class DownloadSpecError(Exception):
-
     """Exception thrown when requests is unable to download the spec file."""
 
     def __init__(self: "DownloadSpecError", arg: requests.RequestException) -> None:
@@ -32,7 +30,6 @@ class DownloadSpecError(Exception):
 
 
 class DownloadSpecHTTPError(Exception):
-
     """Exception thrown when requests is unable to download the spec file."""
 
     def __init__(self, arg: requests.HTTPError) -> None:
@@ -47,7 +44,6 @@ class DownloadSpecHTTPError(Exception):
 
 
 class InvalidConfigError(Exception):
-
     """Exception thrown when the config file is not valid TOML."""
 
     def __init__(self) -> None:
@@ -56,7 +52,6 @@ class InvalidConfigError(Exception):
 
 
 class InvalidConfigTypeError(TypeError):
-
     """Exception thrown when an unknown configuration type is specified."""
 
     def __init__(
@@ -72,7 +67,6 @@ class InvalidConfigTypeError(TypeError):
 
 
 class InvalidSpecError(Exception):
-
     """Exception thrown when the spec file is not valid JSON or YAML."""
 
     def __init__(self) -> None:
@@ -81,7 +75,6 @@ class InvalidSpecError(Exception):
 
 
 class UnknownConfigValueError(AttributeError):
-
     """Exception thrown when an unknown configuration value is specified."""
 
     def __init__(self, name: str) -> None:

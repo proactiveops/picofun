@@ -1,4 +1,5 @@
 """Lambda generator."""
+
 import logging
 import os
 import random
@@ -18,7 +19,6 @@ LAMBDA_SUFFIX_LENGTH = 6
 
 
 class LambdaGenerator:
-
     """Lambda generator."""
 
     def __init__(

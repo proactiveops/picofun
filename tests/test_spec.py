@@ -1,6 +1,5 @@
 """Test the spec file handler."""
 
-
 import pytest
 import requests
 

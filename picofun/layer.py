@@ -1,4 +1,5 @@
 """Lambda layer manager."""
+
 import logging
 import os
 import shutil
@@ -11,7 +12,6 @@ PICORUN_VERSION = "0.1.0"
 
 
 class Layer:
-
     """Manage the contents of a Lambda layer."""
 
     def __init__(self, config: dict) -> None:

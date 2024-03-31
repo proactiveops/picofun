@@ -1,4 +1,5 @@
 """Tests for the TerraformGenerator class."""
+
 import tempfile
 
 import picofun.config

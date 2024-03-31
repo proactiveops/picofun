@@ -1,4 +1,5 @@
 """Entry point for the application script."""
+
 import logging
 
 import picofun.cli

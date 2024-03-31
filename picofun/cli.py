@@ -1,4 +1,5 @@
 """Command line interface for picofun."""
+
 import typing
 
 import typer

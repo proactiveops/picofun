@@ -5,7 +5,6 @@ import re
 
 
 class RequirementsManager:
-
     """Manage the requirements file."""
 
     def __init__(self, path: str) -> None:

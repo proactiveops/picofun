@@ -1,4 +1,5 @@
 """Template loader for Jinja2 templates."""
+
 import os
 import typing
 
@@ -6,7 +7,6 @@ import jinja2
 
 
 class Template:
-
     """Manages Jinja2 templates."""
 
     def __init__(self, base_path: str | None = "") -> None:

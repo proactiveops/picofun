@@ -82,7 +82,7 @@ The most common use case for using code bundles is to include pre and post proce
 
 Out of the box PicoFun generates Lambda functions that make unauthenicated calls to endpoints. Often this isn't what teams need. The preprocessing and postprocessing hooks allow engineers to customize the request payload and response. A common use case for this is to add authentication headers to requests.
 
-An example implementation of these hooks can be found in the [`examples/processors`](examples/processors) directory. The example pulls values from SSM Parameter store and adds them as authentication headers for the request. The postprocessor logs the request URL and response status code.
+An example implementation of these hooks can be found in the [`example/zendesk_common`](example/zendesk_common) directory. The example pulls values from SSM Parameter store and uses them for the domain name and authorization header.
 
 ## Template Overrides
 
@@ -91,8 +91,6 @@ The default templates bundled with PicoFun are usually adequate for most use cas
 If you need to override one PicoFun template, you need to copy both from the package. The templates are located in the `templates` directory in the PicoFun package.
 
 You can add the path to the templates to the `config.toml` file using the `template_path` entry.
-
-An example implementation is included in the [`examples/templates`](examples/templates) directory. The example removes all logging and tracing support from the Lambda functions. This isn't recommended for real projects, but it provides a useful example of the feature.
 
 ## Terraform
 

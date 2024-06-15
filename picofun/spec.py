@@ -100,6 +100,20 @@ class JSONSpecParser(SpecParser):
 class YAMLSpecParser(SpecParser):
     """Parses an OpenAPI spec file in YAML format."""
 
+    def patch_loader(self, loader: yaml.SafeLoader) -> yaml.SafeLoader:
+        """
+        Patch the loader to allow = as a value.
+
+        Handles being call multiple times. It only patches the loader on the first call.
+
+        See https://github.com/yaml/pyyaml/issues/89 for more info.
+
+        :return: The patched YAML loader.
+        """
+        if "=" in loader.yaml_implicit_resolvers:
+            loader.yaml_implicit_resolvers.pop("=")
+        return loader
+
     def parse(self, content: str) -> dict:
         """
         Parse the contents of the spec file.
@@ -108,8 +122,12 @@ class YAMLSpecParser(SpecParser):
         :raises InvalidSpecError: If the spec file is not valid YAML.
         :return: The contents of the spec file as a dict.
         """
+        loader = yaml.SafeLoader
+        patched_loader = self.patch_loader(loader)
         try:
-            return yaml.safe_load(content)
+            return yaml.load(
+                content, Loader=patched_loader  # noqa: S506 Uses a patched safe loader
+            )
         except yaml.YAMLError as e:
             raise picofun.errors.InvalidSpecError() from e
 

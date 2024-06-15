@@ -78,6 +78,12 @@ def test_yaml_spec_parser_invalid_yaml() -> None:
         parser.parse("foo: b: a: r")
 
 
+def test_yaml_spec_parser_value_equals() -> None:
+    """Test the YAMLSpecParser class with a plus symbol as the value."""
+    parser = picofun.spec.YAMLSpecParser()
+    assert parser.parse("key: +") == {"key": "+"}
+
+
 def test_spec_json() -> None:
     """Test the Spec class with JSON."""
     spec = picofun.spec.Spec("tests/data/petstore.json")

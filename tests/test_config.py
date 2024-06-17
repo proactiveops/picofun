@@ -179,6 +179,34 @@ def test_fix_target_path_missing_relative() -> None:
     )
 
 
+def test_fix_bundle_path_relative() -> None:
+    """Test fixing the bundle path with a realtive path."""
+    config = picofun.config.Config("tests/data/config.toml")
+
+    assert config._fix_bundle_path("subdir") == os.path.realpath("tests/data/subdir")
+
+
+def test_fix_bundle_path_absolute() -> None:
+    """Test fixing the bundle path with an absolute path."""
+    config = picofun.config.Config("tests/data/config.toml")
+
+    assert config._fix_bundle_path("/tmp") == os.path.realpath("/tmp")
+
+
+def test_fix_bundle_path_dots() -> None:
+    """Test fixing the bundle path containing dots."""
+    config = picofun.config.Config("tests/data/config.toml")
+
+    assert config._fix_bundle_path("../data") == os.path.realpath("tests/data")
+
+
+def test_fix_bundle_path_empty() -> None:
+    """Test fixing the bundle path with an empty path."""
+    config = picofun.config.Config("tests/data/config.toml")
+
+    assert config._fix_bundle_path("") == os.path.realpath("tests/data")
+
+
 def test_load_from_file() -> None:
     """Test loading a configuration file."""
     config = picofun.config.Config("tests/data/config.toml")

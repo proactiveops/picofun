@@ -30,7 +30,7 @@ dev = [
 
 build = [
   "build==1.2.1",
-  "twine==5.0.0",
+  "twine==5.1.0",
 ]
 
 [build-system]

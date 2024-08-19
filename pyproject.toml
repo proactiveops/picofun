@@ -11,7 +11,7 @@ dependencies = [
   "PyYAML==6.0.1",
   "requests==2.32.3",
   "tomli==2.0.1",
-  "typer==0.12.3",
+  "typer==0.12.4",
 ]
 
 license = {file = "LICENSE.txt"}

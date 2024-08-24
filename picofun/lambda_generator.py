@@ -1,9 +1,8 @@
 """Lambda generator."""
 
+import hashlib
 import logging
 import os
-import random
-import string
 import typing
 
 import black
@@ -13,30 +12,42 @@ import picofun.template
 
 logger = logging.getLogger(__name__)
 
-LAMBDA_MAX_LENGTH = 64
-LAMBDA_PREFIX_LENGTH = LAMBDA_MAX_LENGTH - 7
-LAMBDA_SUFFIX_LENGTH = 6
+LAMBDA_SUFFIX_LENGTH = 4
 
 
 class LambdaGenerator:
     """Lambda generator."""
 
     def __init__(
-        self, template: picofun.template.Template, config: picofun.config.Config
+        self,
+        template: picofun.template.Template,
+        namespace: str,
+        config: picofun.config.Config,
     ) -> None:
         """Initialize the lambda generator."""
         self._template = template
         self._config = config
 
+        self.max_length = 64 - len(f"{namespace}_")
+        self.prefix_length = (
+            # Remove one for the underscore between the prefix and the suffix.
+            self.max_length
+            - LAMBDA_SUFFIX_LENGTH
+            - 1
+        )
+
     def _get_name(self, method: str, path: str) -> str:
         clean_path = path.replace("{", "").replace("}", "")
-        lambda_name = f"{method}_{clean_path.replace('/', '_').strip('_')}"
+        lambda_name = (
+            f"{method}_{clean_path.replace('/', '_').replace('.', '_').strip('_')}"
+        )
 
-        if len(lambda_name) > LAMBDA_MAX_LENGTH:
-            suffix = "".join(
-                random.sample(string.ascii_lowercase, LAMBDA_SUFFIX_LENGTH)
-            )
-            lambda_name = f"{lambda_name[:LAMBDA_PREFIX_LENGTH]}_{suffix}"
+        if len(lambda_name) > self.max_length:
+            suffix = hashlib.sha512(lambda_name.encode()).hexdigest()[
+                :LAMBDA_SUFFIX_LENGTH
+            ]
+            # The underscire adds another character to the length.
+            lambda_name = f"{lambda_name[:self.prefix_length]}_{suffix}"
 
         return lambda_name
 

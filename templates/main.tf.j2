@@ -105,7 +105,7 @@ resource "aws_lambda_function" "this" {
   for_each = toset(local.functions)
 
   filename         = data.archive_file.lambda[each.value].output_path
-  function_name    = "pf_{{ namespace }}_${each.value}"
+  function_name    = "{{ namespace }}_${each.value}"
   role             = aws_iam_role.lambda.arn
   handler          = "${each.value}.handler"
   runtime          = "python3.10"

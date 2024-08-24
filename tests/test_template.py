@@ -11,7 +11,7 @@ def test_template_load() -> None:
     """Test loading a template."""
     template = picofun.template.Template("tests/data/templates")
     file = template.get("empty.j2")
-    assert type(file) == jinja2.environment.Template
+    assert isinstance(file, jinja2.environment.Template)
 
 
 def test_template_load_missing() -> None:

@@ -94,13 +94,29 @@ class LambdaGenerator:
         self, base_url: str, method: str, path: str, details: dict[str : typing.Any]
     ) -> str:
         """Render the lambda function."""
+        preprocessor_handler = self._config.preprocessor
+        preprocessor = (
+            ".".join(preprocessor_handler.split(".")[:-1])
+            if preprocessor_handler
+            else None
+        )
+
+        postprocessor_handler = self._config.postprocessor
+        postprocessor = (
+            ".".join(postprocessor_handler.split(".")[:-1])
+            if postprocessor_handler
+            else None
+        )
+
         code = self._template.render(
             "lambda.py.j2",
             base_url=base_url,
             method=method,
             path=path,
             details=details,
-            preprocessor=self._config.preprocessor,
-            postprocessor=self._config.postprocessor,
+            preprocessor=preprocessor,
+            preprocessor_handler=preprocessor_handler,
+            postprocessor=postprocessor,
+            postprocessor_handler=postprocessor_handler,
         )
         return black.format_str(code, mode=black.Mode())

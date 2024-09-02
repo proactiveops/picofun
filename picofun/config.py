@@ -75,6 +75,9 @@ class Config:
         if not isinstance(value, self._attrs[name]):
             raise picofun.errors.InvalidConfigTypeError(name, value, self._attrs[name])
 
+        if name == "bundle" and value:
+            value = self._fix_bundle_path(value)
+
         if name == "output_dir":
             value = self._fix_target_path(value)
             # Ensure the path exists
@@ -82,6 +85,18 @@ class Config:
                 os.makedirs(value, exist_ok=True)
 
         self.__dict__[name] = value
+
+    def _fix_bundle_path(self, bundle_path: str) -> str:
+        """
+        Fix the bundle path to ensure it is absolute.
+
+        :param bundle_path: The path to the bundle.
+        :return: The absolute path to the bundle.
+        """
+        if not os.path.isabs(bundle_path):
+            bundle_path = os.path.join(os.path.dirname(self._config_file), bundle_path)
+
+        return os.path.realpath(bundle_path)
 
     def _fix_target_path(self, output_dir: str = "") -> str:
         """

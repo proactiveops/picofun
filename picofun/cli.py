@@ -56,7 +56,9 @@ def main(
 
     template = picofun.template.Template(config.template_path)
 
-    lambda_generator = picofun.lambda_generator.LambdaGenerator(template, config)
+    lambda_generator = picofun.lambda_generator.LambdaGenerator(
+        template, namespace, config
+    )
     lambdas = lambda_generator.generate(api_data)
 
     layer = picofun.layer.Layer(config)

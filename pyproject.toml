@@ -10,7 +10,7 @@ dependencies = [
   "jinja2==3.1.4",
   "PyYAML==6.0.2",
   "requests==2.32.3",
-  "tomli==2.0.1",
+  "tomli==2.0.2",
   "typer==0.12.5",
 ]
 

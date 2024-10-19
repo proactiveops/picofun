@@ -41,6 +41,9 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.package-data]
+picfun = ["picofun/templates/*.j2"]
+
 [project.scripts]
 picofun = "picofun:__main__.main"
 

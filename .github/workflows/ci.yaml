@@ -28,5 +28,7 @@ jobs:
         run: ruff format --check .
           
       - name: pytest
-        run: |
-          python -m pytest --capture=no tests/
+        run: coverage run -m pytest
+
+      - name: coverage
+        run: coverage report

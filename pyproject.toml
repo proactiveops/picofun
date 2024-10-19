@@ -22,8 +22,8 @@ dynamic = ["version"]
 [project.optional-dependencies]
 
 dev = [
+  "coverage==7.6.3",
   "pytest==8.3.3",
-  "pytest-cov==5.0.0",
   "pytest-mock==3.14.0",
   "ruff==0.7.0",
 ]
@@ -70,9 +70,6 @@ exclude = '''
   | \.nox
 )
 '''
-
-[tool.pytest.ini_options]
-addopts = "--cov --cov-report term-missing"
 
 [tool.ruff.lint]
 # Rules listed at https://github.com/charliermarsh/ruff#supported-rules

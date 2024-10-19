@@ -61,7 +61,7 @@ resource "null_resource" "layer" {
       rm -rf ${local.lambda_layer_path}
       mkdir -p ${local.lambda_layer_path}/python
       cp -a ${path.module}/layer/. ${local.lambda_layer_path}/python
-      pip3.10 install -r ${local.lambda_layer_path}/python/requirements.txt --target ${local.lambda_layer_path}/python
+      pip3.12 install -r ${local.lambda_layer_path}/python/requirements.txt --target ${local.lambda_layer_path}/python
     EOT
   }
 
@@ -85,7 +85,7 @@ resource "aws_lambda_layer_version" "this" {
   layer_name          = "{{ namespace }}"
   source_code_hash    = data.archive_file.layer.output_base64sha256
 
-  compatible_runtimes      = ["python3.10"]
+  compatible_runtimes      = ["python3.12"]
   compatible_architectures = ["x86_64"]
 
   lifecycle {
@@ -108,7 +108,7 @@ resource "aws_lambda_function" "this" {
   function_name    = "{{ namespace }}_${each.value}"
   role             = aws_iam_role.lambda.arn
   handler          = "${each.value}.handler"
-  runtime          = "python3.10"
+  runtime          = "python3.12"
   source_code_hash = data.archive_file.lambda[each.value].output_base64sha256
   timeout          = 10
   layers           = local.layers

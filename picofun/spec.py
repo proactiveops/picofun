@@ -126,7 +126,8 @@ class YAMLSpecParser(SpecParser):
         patched_loader = self.patch_loader(loader)
         try:
             return yaml.load(
-                content, Loader=patched_loader  # noqa: S506 Uses a patched safe loader
+                content,
+                Loader=patched_loader,  # noqa: S506 Uses a patched safe loader
             )
         except yaml.YAMLError as e:
             raise picofun.errors.InvalidSpecError() from e

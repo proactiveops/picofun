@@ -29,12 +29,8 @@ class LambdaGenerator:
         self._config = config
 
         self.max_length = 64 - len(f"{namespace}_")
-        self.prefix_length = (
-            # Remove one for the underscore between the prefix and the suffix.
-            self.max_length
-            - LAMBDA_SUFFIX_LENGTH
-            - 1
-        )
+        # Remove one for the underscore between the prefix and the suffix.
+        self.prefix_length = self.max_length - LAMBDA_SUFFIX_LENGTH - 1
 
     def _get_name(self, method: str, path: str) -> str:
         clean_path = path.replace("{", "").replace("}", "")

@@ -21,13 +21,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e '.[dev]'
 
-      - name: ruff
-        run: |
-          ruff check --output-format=github .
+      - name: Ruff Check
+        run: ruff check --output-format=github .
 
-      - name: black
-        run: |
-          black --check .
+      - name: Ruff Format
+        run: ruff format --check .
           
       - name: pytest
         run: |

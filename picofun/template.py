@@ -15,12 +15,8 @@ class Template:
             base_path = os.path.join(os.getcwd(), base_path)
 
         path = os.path.realpath(base_path)
-
-        self._environment = (
-            jinja2.Environment(  # noqa: S701 We're not generating HTML # nosec
-                loader=jinja2.FileSystemLoader(path)
-            )
-        )
+        loader = jinja2.FileSystemLoader(path)
+        self._environment = jinja2.Environment(loader=loader)  # noqa: S701 We're not generating HTML # nosec
 
         self.templates = {}
 

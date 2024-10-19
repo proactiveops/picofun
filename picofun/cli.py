@@ -11,11 +11,6 @@ import picofun.spec
 import picofun.template
 import picofun.terraform_generator
 
-# fmt: off
-# Hack to stop black and typer fighting over the type annotations
-OptionalString = typing.Optional[str]
-# fmt: on
-
 app = typer.Typer()
 
 
@@ -28,16 +23,18 @@ def main(
         str, typer.Argument(help="URL or path to the OpenAPI spec file")
     ],
     config_file: typing.Annotated[
-        OptionalString, typer.Option(help="Full path to the configuration file")
+        typing.Optional[str], typer.Option(help="Full path to the configuration file")
     ] = None,
     output_dir: typing.Annotated[
-        OptionalString, typer.Option(help="Directory to output the generated files")
+        typing.Optional[str],
+        typer.Option(help="Directory to output the generated files"),
     ] = None,
     layers: typing.Annotated[
-        OptionalString, typer.Option(help="Comma separated list of Lambda layer ARNs")
+        typing.Optional[str],
+        typer.Option(help="Comma separated list of Lambda layer ARNs"),
     ] = "",
     bundle: typing.Annotated[
-        OptionalString,
+        typing.Optional[str],
         typer.Option(
             help="Path to code to bundle into a layer. If requirements.txt present pip install will be run."
         ),

@@ -44,12 +44,10 @@ data "aws_subnet" "this" {
   id = each.value
 }
 
-resource "aws_vpc_security_group" "lambda" {
-  count = length(data.aws_subnet.this) > 0 ? 1 : 0
-
+resource "aws_security_group" "lambda" {
   name        = "pf-{{ namespace }}-lambdas"
   description = "Security group for pf-{{ namespace }} lambda functions"
-  vpc_id      = data.aws_subnet.this[0].vpc_id
+  vpc_id      = data.aws_subnet.this[local.subnet_ids[0]].vpc_id
 
   tags = local.tags
 }
@@ -113,9 +111,9 @@ resource "aws_lambda_function" "this" {
   timeout          = 10
   layers           = local.layers
 {% if subnets|length > 0 %}
-  "vpc_config" {
-      security_group_ids = aws_vpc_security_group.lambda[*].id
-      subnet_ids         = data.aws_subnet.this[*].id
+  vpc_config {
+      security_group_ids = [aws_security_group.lambda.id]
+      subnet_ids         = [for subnet in data.aws_subnet.this: subnet.id]
   }
 {% endif %}
   tags = local.tags
@@ -147,7 +145,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 }
 {% if subnets|length > 0 %}
 
-resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+resource "aws_iam_role_policy_attachment" "lambda_eni_management" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess"
   role       = aws_iam_role.lambda.name
 }

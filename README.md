@@ -24,10 +24,12 @@ The configuration file has the following structure:
 
 ```toml
 bundle="/path/containing/code/to/bundle/into/build" # default is none
+iam_role_prefix="my-prefix-" # default is "pf-" for PicoFun
 layers="arn:aws:lambda:us-east-1:012345678910:layer:example:1,arn:aws:lambda:us-east-1:012345678910:layer:another-example:123" # default is none
 output_dir="/path/to/write/output-files" # default is current-working-directory/output
 postprocessor="fully.qualified.reference.to.postprocessor" # default is none
 preprocessor="fully.qualified.reference.to.preprocessor" # default is none
+role_permissions_boundary="arn:aws:iam::012345678910:policy/..." # default is none
 subnets="subnet-1234567890abcdef0,subnet-234567890abcdef01" # default is none and VPC networking is no enabled
 tags=... # default is none
 template_path="/path/to/templates" # default is current-working-directory/templates

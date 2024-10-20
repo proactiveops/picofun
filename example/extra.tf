@@ -25,3 +25,21 @@ resource "aws_iam_role_policy_attachment" "ssm_read" {
   role       = aws_iam_role.lambda.name
   policy_arn = aws_iam_policy.ssm_read.arn
 }
+
+terraform {
+  required_version = "~> 1.0"
+  required_providers {
+    archive = {
+      source  = "hashicorp/archive"
+      version = ">= 2.0, < 3.0"
+    }
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.0, < 6.0"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.0, < 4.0"
+    }
+  }
+}

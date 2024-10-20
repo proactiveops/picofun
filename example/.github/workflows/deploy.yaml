@@ -1,0 +1,91 @@
+name: "Deploy"
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: '30 3 * * 6'
+
+jobs:
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Check out code
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install pipx
+        id: install-pipx
+        run: pip install pipx
+
+      - name: Run PicoFun
+        id: run-picofun
+        run: pipx run --spec git+https://github.com/proactiveops/picofun --config-file picofun.toml zendesk https://developer.zendesk.com/zendesk/oas.yaml
+
+      - name: Copy Extra Terraform Files
+        id: copy-extra-tf-files
+        run: cp *.tf output/
+
+      - name: Setup TFLint
+        id: setup-tflint
+        uses: terraform-linters/setup-tflint@19a52fbac37dacb22a09518e4ef6ee234f2d4987 # v4.0.0
+
+      - name: Init TFLint
+        id: init-tflint
+        run: tflint --init
+        env:
+          # Needed to avoid getting rate limited by GitHub API
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: TFLint
+        id: tflint
+        run: tflint
+        working-directory: ./output
+
+      - name: TFSec
+        id: tfsec
+        uses: aquasecurity/tfsec-action@b466648d6e39e7c75324f25d83891162a721f2d6 # v1.0.3
+        with:
+          # Avoiding rate limit again
+          github_token: ${{ github.token }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        id: tf-setup
+        with:
+          terraform_version: 1.9.8
+
+      - name: AWS Login
+        id: aws-login
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: GitHubActions
+
+      - name: Terraform init
+        id: tf-init
+        run: terraform init
+        working-directory: ./output
+
+      - name: Terraform validate
+        id: tf-validate
+        run: terraform validate
+        working-directory: ./output
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
+        working-directory: ./output

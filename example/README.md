@@ -29,7 +29,7 @@ If my agent email address was user.name@example.com the JSON would look like so:
 
 ## Generating Lambdas
 
-To generate the Lambda functions and associated Terraform, run the following commmand:
+To generate the Lambda functions and associated Terraform, you can run the following commmand:
 
 ```sh
 picofun --config-file example/picofun.toml zendesk https://developer.zendesk.com/zendesk/oas.yaml
@@ -88,6 +88,27 @@ Do you want to perform these actions?
 
 Review scrollback to ensure everything looks in order. When you're confident things look ok, type `yes` and hit [enter]. Go make a cup of tea, then bake a cake, make another cup of tea, eat the cake, drink both cups of tea, and then your lambda should have deployed.
 
-## TODO
+## GitHub Action
 
-Create a GitHub Actions workflow for regenerating the functions on a weekly basis.
+There is a full GitHub Actions deployment pipeline included in the project. It is designed to update the deployment once a week or when code is pushed to the main branch.
+
+To use the workflow you must create a repository level environment `AWS_ROLE_ARN` and set the value to the ARN of the role that will perform the deployments. Follow the [AWS documentation for setting up the role using OIDC](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/).
+
+The role must have access to manage IAM roles and policies, lambda functions, and CloudWatch log groups along with the ability to read and write to the Terraform backend resources.
+
+The workflow also needs a backend defined. Add a file called `backend.tf` with the following contents:
+
+```hcl
+terraform {
+  backend "s3" {
+    region = "us-east-1"
+    bucket = "your-state-bucket" # Change to a bucket in your account
+    key    = "picofun-zendesk/terraform.tfstate"
+    dynamodb_table = "terraform-lock" # Make sure this table exists
+  }
+}
+```
+
+For more information on the configuration, [refer to the Terraform S3 backend documentation](https://developer.hashicorp.com/terraform/language/backend/s3).
+
+When run for the first time, the pipeline will take a while. It is deploying over 450 Lambda functions and CloudWatch Log groups.

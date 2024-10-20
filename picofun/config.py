@@ -2,6 +2,7 @@
 
 import os
 import typing
+from importlib.resources import files
 
 import tomli as toml
 
@@ -152,7 +153,7 @@ class Config:
             "preprocessor": "",
             "subnets": [],
             "tags": {},
-            "template_path": "templates",
+            "template_path": os.path.join(files("picofun"), "templates"),
         }
 
         for key in defaults:

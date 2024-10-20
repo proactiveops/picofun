@@ -32,7 +32,7 @@ jobs:
 
       - name: Run PicoFun
         id: run-picofun
-        run: pipx run --spec git+https://github.com/proactiveops/picofun --config-file picofun.toml zendesk https://developer.zendesk.com/zendesk/oas.yaml
+        run: pipx run picofun --config-file picofun.toml zendesk https://developer.zendesk.com/zendesk/oas.yaml
 
       - name: Copy Extra Terraform Files
         id: copy-extra-tf-files

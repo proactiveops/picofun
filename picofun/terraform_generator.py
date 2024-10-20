@@ -33,10 +33,12 @@ class TerraformGenerator:
         template = self._template.get("main.tf.j2")
 
         terraform_content = template.render(
-            namespace=self._namespace,
+            bundle=self._config.bundle,
+            iam_role_prefix=self._config.iam_role_prefix,
             lambdas=lambdas,
             layers=self._config.layers,
-            bundle=self._config.bundle,
+            namespace=self._namespace,
+            role_permissions_boundary=self._config.role_permissions_boundary,
             subnets=self._config.subnets,
             tags=self._config.tags,
         )

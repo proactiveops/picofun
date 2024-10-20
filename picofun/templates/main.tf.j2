@@ -122,9 +122,10 @@ resource "aws_lambda_function" "this" {
 }
 
 resource "aws_iam_role" "lambda" {
-  name = "pf-{{ namespace }}"
+  name = "{{ iam_role_prefix }}{{ namespace }}"
 
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+  permissions_boundary = {{ '"{}"'.format(role_permissions_boundary) if role_permissions_boundary else "null" }}
 
   tags = local.tags
 }

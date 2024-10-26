@@ -8,6 +8,8 @@ import tomli as toml
 
 import picofun.errors
 
+AWS_POWER_TOOLS_LAYER_ARN = "arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:2"
+
 
 class Config:
     """Configuration management class."""
@@ -70,10 +72,17 @@ class Config:
             raise picofun.errors.UnknownConfigValueError(name)
 
         # First allow layers to be set as a comma separated string and convert it to a list
-        if name == "layers" and isinstance(value, str):
-            value = [raw.strip() for raw in value.split(",")]
-            if value == [""]:
-                value = []
+        if name == "layers":
+            if isinstance(value, str):
+                value = [raw.strip() for raw in value.split(",")]
+                if value == [""]:
+                    value = []
+
+            if (
+                len([item for item in value if "awslambdapowertools" in item.lower()])
+                == 0
+            ):
+                value.append(AWS_POWER_TOOLS_LAYER_ARN)
 
         if not isinstance(value, self._attrs[name]):
             raise picofun.errors.InvalidConfigTypeError(name, value, self._attrs[name])
@@ -141,7 +150,7 @@ class Config:
             if key not in self._attrs:
                 raise picofun.errors.UnknownConfigValueError(key)
 
-            if kwargs[key] is not None:
+            if kwargs[key]:
                 setattr(self, key, kwargs[key])
 
     def set_defaults(self) -> None:
@@ -150,7 +159,7 @@ class Config:
             "_config_file": "",
             "bundle": None,
             "iam_role_prefix": "pf-",
-            "layers": [],
+            "layers": [AWS_POWER_TOOLS_LAYER_ARN],
             "output_dir": os.path.realpath(os.path.join(os.getcwd(), "output")),
             "postprocessor": "",
             "preprocessor": "",

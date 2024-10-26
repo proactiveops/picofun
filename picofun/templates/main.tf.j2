@@ -10,11 +10,10 @@ locals {
   temp_path         = "${path.root}/.terraform/tmp"
 
   layers = [
-    aws_lambda_layer_version.this.arn,
-    "arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:41",
   {% for layer in layers -%}
     "{{ layer }}",
   {% endfor %}
+    aws_lambda_layer_version.this.arn,
   ]
 
   functions = [

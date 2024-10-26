@@ -15,7 +15,10 @@ def test_config_load() -> None:
     config = picofun.config.Config("tests/data/config.toml")
 
     assert config.output_dir == os.path.realpath("tests/data/output")
-    assert config.layers == ["arn:aws:lambda:us-east-1:012345678910:layer:example:1"]
+    assert config.layers == [
+        "arn:aws:lambda:us-east-1:012345678910:layer:example:1",
+        picofun.config.AWS_POWER_TOOLS_LAYER_ARN,
+    ]
     assert config.template_path == "tests/data/templates"
 
 
@@ -24,7 +27,7 @@ def test_config_load_empty() -> None:
     config = picofun.config.Config("tests/data/empty.toml")
 
     assert config.output_dir == os.path.realpath(f"{os.getcwd()}/output")
-    assert config.layers == []
+    assert config.layers == [picofun.config.AWS_POWER_TOOLS_LAYER_ARN]
 
 
 def test_config_load_missing() -> None:
@@ -70,7 +73,10 @@ def test_config_getattr() -> None:
     """Test loading a configuration file."""
     config = picofun.config.Config("tests/data/config.toml")
 
-    assert config.layers == ["arn:aws:lambda:us-east-1:012345678910:layer:example:1"]
+    assert config.layers == [
+        "arn:aws:lambda:us-east-1:012345678910:layer:example:1",
+        picofun.config.AWS_POWER_TOOLS_LAYER_ARN,
+    ]
 
 
 def test_config_getattr_invalid() -> None:
@@ -93,7 +99,7 @@ def test_config_setattr_layers_empty() -> None:
     config = picofun.config.Config("tests/data/empty.toml")
 
     config.layers = ""
-    assert config.layers == []
+    assert config.layers == [picofun.config.AWS_POWER_TOOLS_LAYER_ARN]
 
 
 def test_config_setattr_layers() -> None:
@@ -101,12 +107,26 @@ def test_config_setattr_layers() -> None:
     layers = [
         "arn:aws:lambda:us-east-1:012345678910:layer:example:1",
         "arn:aws:lambda:us-east-1:012345678910:layer:anotherexample:123",
+        picofun.config.AWS_POWER_TOOLS_LAYER_ARN,
     ]
 
     config = picofun.config.Config("tests/data/empty.toml")
-    assert config.layers == []
+    assert config.layers == [picofun.config.AWS_POWER_TOOLS_LAYER_ARN]
 
     config.layers = ", ".join(layers)
+    assert config.layers == layers
+
+
+def test_config_setattr_layers_powertools() -> None:
+    """Test splitting layers string into a list."""
+    layers = [
+        "arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:79"
+    ]
+
+    config = picofun.config.Config("tests/data/empty.toml")
+    assert config.layers == [picofun.config.AWS_POWER_TOOLS_LAYER_ARN]
+
+    config.layers = layers
     assert config.layers == layers
 
 
@@ -274,7 +294,7 @@ def test_set_defaults() -> None:
     config.set_defaults()
 
     assert config.bundle is None
-    assert config.layers == []
+    assert config.layers == [picofun.config.AWS_POWER_TOOLS_LAYER_ARN]
 
 
 def test_asdict() -> None:
@@ -284,6 +304,7 @@ def test_asdict() -> None:
     config_dict = config.asdict()
 
     assert isinstance(config_dict, dict)
+
     assert config_dict["output_dir"] == os.path.realpath("tests/data/output")
 
 
@@ -291,7 +312,7 @@ def test_asdict_empty() -> None:
     """Test converting the config to a dictionary."""
     config = picofun.config.Config("tests/data/empty.toml")
 
-    assert config.asdict()["layers"] == []
+    assert config.asdict()["layers"] == [picofun.config.AWS_POWER_TOOLS_LAYER_ARN]
 
 
 def test_get_config_file() -> None:

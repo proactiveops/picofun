@@ -114,5 +114,6 @@ class LambdaGenerator:
             preprocessor_handler=preprocessor_handler,
             postprocessor=postprocessor,
             postprocessor_handler=postprocessor_handler,
+            xray_tracing=self._config.xray_tracing,
         )
         return black.format_str(code, mode=black.Mode())

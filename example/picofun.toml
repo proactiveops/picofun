@@ -1,7 +1,7 @@
 bundle = "helpers"
 iam_role_prefix = "pf-example-"
 preprocessor = "zendesk_common.preprocessor.preprocess"
-subnets=["subnet-707a1eeloaded", "subnet-d3adb33f" , "subnet-badcafe"]
+subnets=["subnet-707a1eeloaded", "subnet-d3adb33f", "subnet-badcafe"]
 
 [tags]
 app = "picofun-zendesk"

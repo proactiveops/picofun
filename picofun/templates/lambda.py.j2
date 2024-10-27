@@ -4,6 +4,8 @@ from typing import Any
 
 import requests
 from aws_lambda_powertools import Logger
+{% if xray_tracing %}from aws_lambda_powertools import Tracer
+{% endif %}
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 import picorun
@@ -12,9 +14,13 @@ import picorun
 {% endif %}{% if postprocessor %}import {{postprocessor}}
 {% endif %}
 logger = Logger()
+{% if xray_tracing %}tracer = Tracer()
+{% endif %}
 
 
 @logger.inject_lambda_context
+{% if xray_tracing %}@tracer.capture_lambda_handler
+{% endif %} 
 def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
     """{{ details.summary | default('') }}."""
     properties = picorun.ApiRequestArgs(**event)

@@ -41,6 +41,7 @@ class TerraformGenerator:
             role_permissions_boundary=self._config.role_permissions_boundary,
             subnets=self._config.subnets,
             tags=self._config.tags,
+            xray_tracing=self._config.xray_tracing,
         )
         output_file = os.path.join(output_dir, "main.tf")
         with open(output_file, "w") as terraform_file:

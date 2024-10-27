@@ -26,6 +26,7 @@ class Config:
         "subnets": list,
         "tags": dict,
         "template_path": str,
+        "xray_tracing": bool,
     }
 
     def __init__(self, file_path: typing.Optional[str] = None) -> None:
@@ -167,6 +168,7 @@ class Config:
             "subnets": [],
             "tags": {},
             "template_path": os.path.join(files("picofun"), "templates"),
+            "xray_tracing": True,
         }
 
         for key in defaults:

@@ -115,6 +115,11 @@ resource "aws_lambda_function" "this" {
       subnet_ids         = [for subnet in data.aws_subnet.this: subnet.id]
   }
 {% endif %}
+{% if xray_tracing %}
+  tracing_config {
+    mode = "Active"
+  }
+{% endif %}
   tags = local.tags
 }
 
@@ -146,6 +151,14 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 
 resource "aws_iam_role_policy_attachment" "lambda_eni_management" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess"
+  role       = aws_iam_role.lambda.name
+}
+
+{% endif %}
+{% if xray_tracing %}
+
+resource "aws_iam_role_policy_attachment" "lambda_xray" {
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
   role       = aws_iam_role.lambda.name
 }
 

@@ -1,7 +1,11 @@
 variable "tags" {
   type        = map(string)
   description = "Tags to apply to all resources"
-  default     = {}
+  default     = {
+    {% if subnets|length > 0 %}{% for tag in tags -%}    "{{ tag }}" = "{{ tags[tag] }}",
+    {% endfor %}
+{% endif %}    "generated_by" = "picofun",
+  }
 }
 
 locals {

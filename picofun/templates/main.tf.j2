@@ -28,15 +28,6 @@ locals {
   {% for subnet in subnets -%}    "{{ subnet }}",
   {% endfor %}]
 {% endif %}
-  tags = merge(
-    {
-      "generated_by" = "picofun"
-    },{% if tags|length > 0 %}
-    { {% for tag in tags -%}
-      {{ tag }} = "{{ tags[tag] }}",
-    {% endfor %} },{%- endif %}
-    var.tags
-  )
 }
 {% if subnets|length > 0 %}
 data "aws_subnet" "this" {
@@ -50,7 +41,7 @@ resource "aws_security_group" "lambda" {
   description = "Security group for pf-{{ namespace }} lambda functions"
   vpc_id      = data.aws_subnet.this[local.subnet_ids[0]].vpc_id
 
-  tags = local.tags
+  tags = var.tags
 }
 {% endif %}
 resource "null_resource" "layer" {
@@ -121,7 +112,7 @@ resource "aws_lambda_function" "this" {
     mode = "Active"
   }
 {% endif %}
-  tags = local.tags
+  tags = var.tags
 }
 
 resource "aws_iam_role" "lambda" {
@@ -130,7 +121,7 @@ resource "aws_iam_role" "lambda" {
   assume_role_policy   = data.aws_iam_policy_document.lambda_assume_role.json
   permissions_boundary = {{ '"{}"'.format(role_permissions_boundary) if role_permissions_boundary else "null" }}
 
-  tags = local.tags
+  tags = var.tags
 }
 
 data "aws_iam_policy_document" "lambda_assume_role" {
@@ -168,7 +159,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
 
   retention_in_days = 14
 
-  tags = local.tags
+  tags = var.tags
 }
 
 output "lambda_function_arns" {

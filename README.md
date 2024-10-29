@@ -33,13 +33,13 @@ output_dir="/path/to/write/output-files" # default is current-working-directory/
 postprocessor="fully.qualified.reference.to.postprocessor" # default is none
 preprocessor="fully.qualified.reference.to.preprocessor" # default is none
 role_permissions_boundary="arn:aws:iam::012345678910:policy/..." # default is none
-subnets=[ # default is none. Unless specified VPC networking is not enabled
+subnets=[ # default is none. Must be set if vpc_id is set
   "subnet-1234567890abcdef0",
   "subnet-234567890abcdef01"
 ]
 template_path="/path/to/templates" # default is current-working-directory/templates
 xray_tracing=false # default is to enable xray tracing, set this to false to turn it off
-
+vpc_id = "vpc-0011223344556677f" # Default is none. Must be set if using subnets
 [tags] # defaults to none
 key="value"
 anotherKey="some other value"

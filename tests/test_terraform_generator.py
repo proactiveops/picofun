@@ -9,7 +9,7 @@ import picofun.terraform_generator
 
 def test_generate() -> None:
     """Test generating the terraform configuration."""
-    config = picofun.config.Config("tests/data/empty.toml")
+    config = picofun.config.Config()
     tpl = picofun.template.Template("tests/data/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir

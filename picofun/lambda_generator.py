@@ -26,7 +26,7 @@ class LambdaGenerator:
     ) -> None:
         """Initialize the lambda generator."""
         self._template = template
-        self._config = config
+        self._config = config.model_dump()
 
         self.max_length = 64 - len(f"{namespace}_")
         # Remove one for the underscore between the prefix and the suffix.
@@ -52,7 +52,7 @@ class LambdaGenerator:
         api_data: dict[str : typing.Any],
     ) -> list[str]:
         """Generate the lambda functions."""
-        output_dir = self._config.output_dir
+        output_dir = self._config["output_dir"]
 
         lambda_dir = os.path.join(output_dir, "lambdas")
         if not os.path.exists(lambda_dir):
@@ -90,14 +90,14 @@ class LambdaGenerator:
         self, base_url: str, method: str, path: str, details: dict[str : typing.Any]
     ) -> str:
         """Render the lambda function."""
-        preprocessor_handler = self._config.preprocessor
+        preprocessor_handler = self._config["preprocessor"]
         preprocessor = (
             ".".join(preprocessor_handler.split(".")[:-1])
             if preprocessor_handler
             else None
         )
 
-        postprocessor_handler = self._config.postprocessor
+        postprocessor_handler = self._config["postprocessor"]
         postprocessor = (
             ".".join(postprocessor_handler.split(".")[:-1])
             if postprocessor_handler
@@ -114,6 +114,6 @@ class LambdaGenerator:
             preprocessor_handler=preprocessor_handler,
             postprocessor=postprocessor,
             postprocessor_handler=postprocessor_handler,
-            xray_tracing=self._config.xray_tracing,
+            xray_tracing=self._config["xray_tracing"],
         )
         return black.format_str(code, mode=black.Mode())

@@ -8,6 +8,7 @@ description = "PicoFun AWS Lambda generator"
 dependencies = [
   "black==24.10.0", # ruff can't be invoked from code without shelling out
   "jinja2==3.1.4",
+  "pydantic==2.9.2",
   "PyYAML==6.0.2",
   "requests==2.32.3",
   "tomli==2.0.2",
@@ -52,6 +53,9 @@ packages = ["picofun"]
 
 [tool.setuptools-git-versioning]
 enabled = true
+
+[tool.coverage.report]
+show_missing = true
 
 [tool.black]
 line-length = 88

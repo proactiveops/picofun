@@ -77,6 +77,6 @@ class InvalidSpecError(Exception):
 class UnknownConfigValueError(AttributeError):
     """Exception thrown when an unknown configuration value is specified."""
 
-    def __init__(self, name: str) -> None:
+    def __init__(self) -> None:
         """Initialise UnknownConfigValueError."""
-        super().__init__(name=name, obj="Config")
+        super().__init__("Invalid property found in config file.")

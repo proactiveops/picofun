@@ -10,7 +10,9 @@ import picofun.template
 def test_get_name() -> None:
     """Test getting the name of the lambda."""
     tpl = picofun.template.Template("tests/data/templates")
-    generator = picofun.lambda_generator.LambdaGenerator(tpl, "", "tests/data/lambda")
+    generator = picofun.lambda_generator.LambdaGenerator(
+        tpl, "", picofun.config.Config()
+    )
 
     assert generator._get_name("method", "path") == "method_path"
 
@@ -18,7 +20,9 @@ def test_get_name() -> None:
 def test_get_name_with_dot() -> None:
     """Test getting the name of the lambda when path contains a dot (.)."""
     tpl = picofun.template.Template("tests/data/templates")
-    generator = picofun.lambda_generator.LambdaGenerator(tpl, "", "tests/data/lambda")
+    generator = picofun.lambda_generator.LambdaGenerator(
+        tpl, "", picofun.config.Config()
+    )
 
     assert generator._get_name("method", "path.json") == "method_path_json"
 
@@ -27,7 +31,7 @@ def test_get_name_too_long() -> None:
     """Test getting the name of the lambda."""
     tpl = picofun.template.Template("tests/data/templates")
     generator = picofun.lambda_generator.LambdaGenerator(
-        tpl, "prefix", "tests/data/lambda"
+        tpl, "prefix", picofun.config.Config()
     )
 
     path = "how_long_does_this_string_need_to_be_before_it_is_truncated_by_get_name"
@@ -63,7 +67,7 @@ def test_generate() -> None:
     }
 
     tpl = picofun.template.Template("tests/data/templates")
-    config = picofun.config.Config("tests/data/empty.toml")
+    config = picofun.config.Config()
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
         generator = picofun.lambda_generator.LambdaGenerator(tpl, "", config)
@@ -97,7 +101,7 @@ def test_generate_empty() -> None:
     }
 
     tpl = picofun.template.Template("tests/data/templates")
-    config = picofun.config.Config("tests/data/empty.toml")
+    config = picofun.config.Config()
 
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
@@ -110,7 +114,7 @@ def test_generate_invalid_method() -> None:
     spec = {"servers": [{"url": "https://example.com"}], "paths": {}}
 
     tpl = picofun.template.Template("tests/data/templates")
-    config = picofun.config.Config("tests/data/empty.toml")
+    config = picofun.config.Config()
 
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
@@ -121,7 +125,7 @@ def test_generate_invalid_method() -> None:
 def test_render() -> None:
     """Test rendering the lambda."""
     tpl = picofun.template.Template("tests/data/templates")
-    config = picofun.config.Config("tests/data/empty.toml")
+    config = picofun.config.Config()
     generator = picofun.lambda_generator.LambdaGenerator(tpl, "", config)
 
     code = generator.render("https://example.com", "get", "/path", {})

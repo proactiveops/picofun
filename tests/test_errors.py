@@ -47,7 +47,7 @@ def test_invalid_spec_error() -> None:
 def test_unknown_config_value_error() -> None:
     """Test UnknownConfigValueError."""
     with pytest.raises(picofun.errors.UnknownConfigValueError):
-        raise picofun.errors.UnknownConfigValueError("missing")
+        raise picofun.errors.UnknownConfigValueError()
 
 
 def test_invalid_config_type_error() -> None:

@@ -41,7 +41,7 @@ def main(
     ] = None,
 ) -> None:
     """Generate lambda functions and terraform configuration to call REST APIs."""
-    config = picofun.config.Config(config_file)
+    config = picofun.config.ConfigLoader(config_file).get_config()
     config.merge(
         output_dir=output_dir,
         layers=layers,

@@ -30,16 +30,10 @@ locals {
 {% endif %}
 }
 {% if subnets|length > 0 %}
-data "aws_subnet" "this" {
-  for_each = toset(local.subnet_ids)
-
-  id = each.value
-}
-
 resource "aws_security_group" "lambda" {
   name        = "pf-{{ namespace }}-lambdas"
   description = "Security group for pf-{{ namespace }} lambda functions"
-  vpc_id      = data.aws_subnet.this[local.subnet_ids[0]].vpc_id
+  vpc_id      = "{{ vpc_id }}"
 
   tags = var.tags
 }
@@ -96,6 +90,7 @@ resource "aws_lambda_function" "this" {
   filename         = data.archive_file.lambda[each.value].output_path
   function_name    = "{{ namespace }}_${each.value}"
   role             = aws_iam_role.lambda.arn
+  architectures    = ["arm64"]
   handler          = "${each.value}.handler"
   runtime          = "python3.12"
   source_code_hash = data.archive_file.lambda[each.value].output_base64sha256
@@ -104,7 +99,7 @@ resource "aws_lambda_function" "this" {
 {% if subnets|length > 0 %}
   vpc_config {
       security_group_ids = [aws_security_group.lambda.id]
-      subnet_ids         = [for subnet in data.aws_subnet.this: subnet.id]
+      subnet_ids         = [for subnet in local.subnet_ids: subnet]
   }
 {% endif %}
 {% if xray_tracing %}

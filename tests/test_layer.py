@@ -9,7 +9,7 @@ import picofun.layer
 
 def test_prepare() -> None:
     """Test generating the layer."""
-    config = picofun.config.Config("tests/data/empty.toml")
+    config = picofun.config.Config()
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
         layer = picofun.layer.Layer(config)
@@ -20,7 +20,7 @@ def test_prepare() -> None:
 
 def test_prepare_with_bundle() -> None:
     """Test generating the layer."""
-    config = picofun.config.Config("tests/data/empty.toml")
+    config = picofun.config.Config()
 
     with tempfile.TemporaryDirectory() as bundle_dir:
         config.bundle = bundle_dir

@@ -38,7 +38,7 @@ build = [
 requires = [
   "setuptools==75.5.0",
   "setuptools-git-versioning==2.0.0",
-  "wheel==0.41.1",
+  "wheel==0.45.0",
 ]
 build-backend = "setuptools.build_meta"
 

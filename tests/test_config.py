@@ -59,7 +59,7 @@ def test_config_setattr_output_dir_mkdir() -> None:
 
     # Can't use tempfile.mkdtemp as it creates the directory
     tmp = os.path.realpath(
-        f'/tmp/picofun_tests_{"".join(random.sample(string.ascii_letters + string.digits, 16))}'
+        f"/tmp/picofun_tests_{''.join(random.sample(string.ascii_letters + string.digits, 16))}"
     )
 
     assert not os.path.exists(tmp)

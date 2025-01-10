@@ -43,7 +43,7 @@ class LambdaGenerator:
                 :LAMBDA_SUFFIX_LENGTH
             ]
             # The underscire adds another character to the length.
-            lambda_name = f"{lambda_name[:self.prefix_length]}_{suffix}"
+            lambda_name = f"{lambda_name[: self.prefix_length]}_{suffix}"
 
         return lambda_name
 

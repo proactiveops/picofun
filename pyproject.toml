@@ -6,7 +6,7 @@ authors = [
 description = "PicoFun AWS Lambda generator"
 
 dependencies = [
-  "black==24.10.0", # ruff can't be invoked from code without shelling out
+  "black==25.1.0", # ruff can't be invoked from code without shelling out
   "jinja2==3.1.5",
   "pydantic==2.10.5",
   "PyYAML==6.0.2",

@@ -23,7 +23,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 
 dev = [
-  "coverage==7.6.10",
+  "coverage==7.6.12",
   "pytest==8.3.4",
   "pytest-mock==3.14.0",
   "ruff==0.9.2",

@@ -1,0 +1,9 @@
+[project]
+name = "picofun-test"
+version = "0.1.0"
+description = "Test project files for picofun"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "picorun==0.1.0",
+]

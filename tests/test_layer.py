@@ -15,7 +15,7 @@ def test_prepare() -> None:
         layer = picofun.layer.Layer(config)
         layer.prepare()
 
-        assert os.path.isfile(os.path.join(out_dir, "layer", "requirements.txt"))
+        assert os.path.isfile(os.path.join(out_dir, "layer", "pyproject.toml"))
 
 
 def test_prepare_with_bundle() -> None:

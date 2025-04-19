@@ -23,20 +23,20 @@ def main(
         str, typer.Argument(help="URL or path to the OpenAPI spec file")
     ],
     config_file: typing.Annotated[
-        typing.Optional[str], typer.Option(help="Full path to the configuration file")
+        str | None, typer.Option(help="Full path to the configuration file")
     ] = None,
     output_dir: typing.Annotated[
-        typing.Optional[str],
+        str | None,
         typer.Option(help="Directory to output the generated files"),
     ] = None,
     layers: typing.Annotated[
-        typing.Optional[str],
+        str | None,
         typer.Option(help="Comma separated list of Lambda layer ARNs"),
     ] = "",
     bundle: typing.Annotated[
-        typing.Optional[str],
+        str | None,
         typer.Option(
-            help="Path to code to bundle into a layer. If requirements.txt present pip install will be run."
+            help="Path to code to bundle into a layer. If pyproject.toml present uv sync will be run."
         ),
     ] = None,
 ) -> None:

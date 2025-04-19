@@ -4,7 +4,6 @@ import os
 import random
 import string
 import tempfile
-import typing
 
 import pydantic
 import pytest
@@ -227,7 +226,7 @@ def test_config_validate_template_path_not_found() -> None:
     ],
 )
 def test_config_validate_subnets_vpc(
-    vpc_id: str, subnets: list, expected: dict[str : typing.Union[str | list]]
+    vpc_id: str, subnets: list, expected: dict[str : str | list]
 ) -> None:
     """Test subnets VPC validation."""
     params = {"vpc_id": vpc_id, "subnets": subnets}

@@ -4,7 +4,7 @@ import logging
 import os
 import shutil
 
-import picofun.requirements_manager
+import picofun.pyproject_manager
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +26,9 @@ class Layer:
         if self._config.bundle and os.path.isdir(self._config.bundle):
             shutil.copytree(self._config.bundle, layer_dir)
 
-        # Handle requirements.txt updates
-        requirements_file = os.path.join(layer_dir, "requirements.txt")
-        requirements = picofun.requirements_manager.RequirementsManager(
-            requirements_file
-        )
+        # Handle pyproject.toml updates
+        toml_file = os.path.join(layer_dir, "pyproject.toml")
+        requirements = picofun.pyproject_manager.PyProjectManager(toml_file)
         requirements.update("picorun", PICORUN_VERSION)
         requirements.save()
 

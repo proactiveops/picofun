@@ -5,13 +5,15 @@ authors = [
 ]
 description = "PicoFun AWS Lambda generator"
 
+requires-python = ">=3.12"
+
 dependencies = [
   "black==25.1.0", # ruff can't be invoked from code without shelling out
   "jinja2==3.1.6",
   "pydantic==2.11.3",
   "PyYAML==6.0.2",
   "requests==2.32.3",
-  "tomli==2.2.1",
+  "tomlkit==0.13.2",
   "typer==0.15.2",
 ]
 
@@ -20,8 +22,7 @@ readme = "README.md"
 
 dynamic = ["version"]
 
-[project.optional-dependencies]
-
+[dependency-groups]
 dev = [
   "coverage==7.8.0",
   "pytest==8.3.5",

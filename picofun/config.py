@@ -4,7 +4,7 @@ import os
 import typing
 from importlib.resources import files
 
-import tomli as toml
+import tomlkit
 from pydantic import (
     BaseModel,
     DirectoryPath,
@@ -15,7 +15,7 @@ from pydantic import (
 
 import picofun.errors
 
-AWS_POWER_TOOLS_LAYER_ARN = "arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:2"
+AWS_POWER_TOOLS_LAYER_ARN = "arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:7"
 
 
 class Config(BaseModel, extra="forbid", validate_assignment=True):
@@ -76,9 +76,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("layers", mode="before")
     @classmethod
-    def validate_layers(
-        cls: "Config", value: typing.Union[str | list[str]]
-    ) -> list[str]:
+    def validate_layers(cls: "Config", value: str | list[str]) -> list[str]:
         """
         Check if layers is a list of strings.
 
@@ -136,9 +134,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("subnets", mode="before")
     @classmethod
-    def validate_subnets(
-        cls: "Config", value: typing.Union[str | list[str]]
-    ) -> list[str]:
+    def validate_subnets(cls: "Config", value: str | list[str]) -> list[str]:
         """
         Check if subnets is a list of strings.
 
@@ -207,7 +203,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 class ConfigLoader:
     """Configuration management class."""
 
-    def __init__(self, file_path: typing.Optional[str] = None) -> None:
+    def __init__(self, file_path: str | None = None) -> None:
         """
         Initialize the configuration.
 
@@ -219,7 +215,7 @@ class ConfigLoader:
         self._config_file = self._get_config_file(file_path)
         self._config = self.load_from_file(self._config_file)
 
-    def _get_config_file(self, config_file: typing.Optional[str] = None) -> str:
+    def _get_config_file(self, config_file: str | None = None) -> str:
         """
         Get the path to the configuration file.
 
@@ -268,8 +264,8 @@ class ConfigLoader:
 
         with open(path, "rb") as file:
             try:
-                contents = toml.load(file)
-            except toml.TOMLDecodeError as e:
+                contents = tomlkit.load(file)
+            except tomlkit.exceptions.ParseError as e:
                 raise picofun.errors.InvalidConfigError() from e
 
         try:

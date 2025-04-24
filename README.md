@@ -8,13 +8,13 @@ PicoFun is a tool for generating Python based clients for OpenAPI spec files. Th
 
 ## Installation
 
-PicoFun can be installed using `pip`, but it is recommended to use `pipx`. This is particularly useful in a CI/CD pipeline. Invoke PicoFun with `pipx` like this:
+PicoFun can be installed using `uv`, but it is recommended to use `uvx`. This is particularly useful in a CI/CD pipeline. Invoke PicoFun with `uvx` like this:
 
 ```bash
-pipx run picofun [ARGS]
+uvx picofun [ARGS]
 ```
 
-If you need to install `pipx`, please [refer to the documention](https://pypa.github.io/pipx/).
+If you need to install `uv`/`uvx`, please [refer to the documention](https://docs.astral.sh/uv/getting-started/installation/).
 
 ## Configuration
 
@@ -53,7 +53,7 @@ Here is a minimal example:
 
 ```bash
 
-picofun example https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/api-with-examples.json
+uv -m picofun example https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/api-with-examples.json
 
 ```
 
@@ -72,7 +72,7 @@ Here is an example of overriding the configuration file:
 
 ```bash
 
-picofun --config ~/picofun-example.toml example example.json
+uv -m picofun --config ~/picofun-example.toml example example.json
 
 ```
 
@@ -80,7 +80,7 @@ Commonly the layers argument is used to provide different layer ARNs based on th
 
 ```bash
 
-picofun --layers "arn:aws:lambda:us-east-1:012345678912:layer:example:1,arn:aws:lambda:us-east-1:012345678912:layer:another-example:123" example example.yaml
+uv -m picofun --layers "arn:aws:lambda:us-east-1:012345678912:layer:example:1,arn:aws:lambda:us-east-1:012345678912:layer:another-example:123" example example.yaml
 
 ```
 

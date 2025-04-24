@@ -44,7 +44,8 @@ resource "null_resource" "layer" {
       rm -rf ${local.lambda_layer_path}
       mkdir -p ${local.lambda_layer_path}/python
       cp -a ${path.module}/layer/. ${local.lambda_layer_path}/python
-      pip3.12 install -r ${local.lambda_layer_path}/python/requirements.txt --target ${local.lambda_layer_path}/python
+      cd ${local.lambda_layer_path}/python
+      uv pip install . --target .
     EOT
   }
 
@@ -54,22 +55,22 @@ resource "null_resource" "layer" {
 }
 
 data "archive_file" "layer" {
-  depends_on = [null_resource.layer]
-
   source_dir  = local.lambda_layer_path
   output_path = "${local.temp_path}/layer_{{ namespace }}.zip"
   type        = "zip"
+
+  depends_on = [null_resource.layer]
 }
 
 resource "aws_lambda_layer_version" "this" {
-  depends_on = [data.archive_file.layer]
-
   filename            = data.archive_file.layer.output_path
   layer_name          = "{{ namespace }}"
   source_code_hash    = data.archive_file.layer.output_base64sha256
 
-  compatible_runtimes      = ["python3.12"]
-  compatible_architectures = ["x86_64"]
+  compatible_runtimes      = ["python3.13"]
+  compatible_architectures = ["arm64"]
+
+  depends_on = [data.archive_file.layer]
 
   lifecycle {
     create_before_destroy = true
@@ -92,7 +93,7 @@ resource "aws_lambda_function" "this" {
   role             = aws_iam_role.lambda.arn
   architectures    = ["arm64"]
   handler          = "${each.value}.handler"
-  runtime          = "python3.12"
+  runtime          = "python3.13"
   source_code_hash = data.archive_file.lambda[each.value].output_base64sha256
   timeout          = 10
   layers           = local.layers

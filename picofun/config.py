@@ -42,6 +42,8 @@ class ServerConfig(BaseModel, extra="forbid"):
 class Config(BaseModel, extra="forbid", validate_assignment=True):
     """Configuration management class."""
 
+    auth_enabled: bool = True
+    auth_ttl_minutes: int = 5
     bundle: str = None
     iam_role_prefix: str = "pf-"
     include_endpoints: str = None
@@ -71,6 +73,47 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
             raise ValueError("Both subnets and vpc must be set, if one is set")  # noqa TRY003 This is a valid use case for a ValueError.
 
         return self
+
+    @model_validator(mode="after")
+    def validate_auth_preprocessor(self) -> "Config":
+        """
+        Check if auth is enabled and preprocessor is set.
+
+        Raises
+        ------
+            ValueError: If auth_enabled is True and preprocessor is set.
+
+        """
+        if self.auth_enabled and self.preprocessor:
+            raise ValueError(  # noqa: TRY003 This is a valid use case for a ValueError.
+                "Cannot use both auth_enabled and preprocessor. Set auth.enabled=false to use a custom preprocessor."
+            )
+
+        return self
+
+    @field_validator("auth_ttl_minutes", mode="before")
+    @classmethod
+    def validate_auth_ttl(cls: "Config", value: int) -> int:
+        """
+        Check if auth_ttl_minutes is a positive integer.
+
+        Args:
+        ----
+            value: The value to validate.
+
+        Returns:
+        -------
+            int: The validated value.
+
+        Raises:
+        ------
+            ValueError: If the value is not a positive integer.
+
+        """
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError("auth_ttl_minutes must be a positive integer")  # noqa TRY003 This is a valid use case for a ValueError.
+
+        return value
 
     @field_validator("bundle", mode="before")
     @classmethod

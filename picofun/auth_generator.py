@@ -19,7 +19,7 @@ def _to_kebab_case(text: str) -> str:
 
     """
     # Insert hyphen before uppercase letters and convert to lowercase
-    return re.sub(r'(?<!^)(?=[A-Z])', '-', text).lower()
+    return re.sub(r"(?<!^)(?=[A-Z])", "-", text).lower()
 
 
 def generate_auth_hooks(

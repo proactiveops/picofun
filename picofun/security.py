@@ -124,6 +124,25 @@ def _get_scheme_priority(scheme: SecurityScheme) -> int:
     return 999  # Unknown scheme type
 
 
+def get_scheme_type_kebab(scheme: SecurityScheme) -> str:
+    """
+    Convert a security scheme type to kebab-case for SSM parameter naming.
+
+    Args:
+        scheme: The security scheme
+
+    Returns:
+        The scheme type in kebab-case (e.g., 'api-key', 'http', 'mutual-tls')
+
+    """
+    type_map = {
+        "apiKey": "api-key",
+        "http": "http",
+        "mutualTLS": "mutual-tls",
+    }
+    return type_map.get(scheme.type, scheme.type)
+
+
 def select_security_scheme(
     schemes: dict[str, SecurityScheme], global_security: list[str]
 ) -> SecurityScheme | None:

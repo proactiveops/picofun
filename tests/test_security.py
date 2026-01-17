@@ -7,6 +7,7 @@ from picofun.security import (
     SecurityScheme,
     extract_security_schemes,
     get_global_security,
+    get_scheme_type_kebab,
     select_security_scheme,
 )
 
@@ -420,3 +421,41 @@ def test_get_scheme_priority_unknown_type() -> None:
     priority = _get_scheme_priority(unknown_scheme)
 
     assert priority == 999
+
+
+def test_get_scheme_type_kebab_api_key() -> None:
+    """Convert apiKey type to kebab-case."""
+    scheme = SecurityScheme(
+        name="apiKeyAuth", type="apiKey", location="header", param_name="X-API-Key"
+    )
+
+    result = get_scheme_type_kebab(scheme)
+
+    assert result == "api-key"
+
+
+def test_get_scheme_type_kebab_mutual_tls() -> None:
+    """Convert mutualTLS type to kebab-case with special handling."""
+    scheme = SecurityScheme(name="mtlsAuth", type="mutualTLS")
+
+    result = get_scheme_type_kebab(scheme)
+
+    assert result == "mutual-tls"
+
+
+def test_get_scheme_type_kebab_http() -> None:
+    """Convert http type (already lowercase) to kebab-case."""
+    scheme = SecurityScheme(name="bearerAuth", type="http", scheme="bearer")
+
+    result = get_scheme_type_kebab(scheme)
+
+    assert result == "http"
+
+
+def test_get_scheme_type_kebab_oauth2() -> None:
+    """Convert oauth2 type to kebab-case."""
+    scheme = SecurityScheme(name="oauth", type="oauth2")
+
+    result = get_scheme_type_kebab(scheme)
+
+    assert result == "oauth2"

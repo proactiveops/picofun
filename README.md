@@ -41,10 +41,16 @@ subnets=[ # default is none. Must be set if vpc_id is set
 template_path="/path/to/templates" # default is current-working-directory/templates
 xray_tracing=false # default is to enable xray tracing, set this to false to turn it off
 vpc_id = "vpc-0011223344556677f" # Default is none. Must be set if using subnets
+
+[auth]
+enabled=true # default is true. Set to false to disable automatic authentication
+ttl_minutes=5 # default is 5 minutes. TTL for caching credentials in Lambda memory
+
 [server] # Optional: Override or customize server URLs from OpenAPI spec
 url = "https://api.example.com" # Full URL override (mutually exclusive with variables)
 # OR
 variables = { subdomain = "api", version = "v2" } # Override server URL variables
+
 [tags] # defaults to none
 key="value"
 anotherKey="some other value"
@@ -173,9 +179,177 @@ The path patterns support two types of wildcards:
 
 When specifying methods for a path, the matching is case-insensitive. If no methods are specified for a path entry, all HTTP methods are allowed for that path.
 
+## Automatic Authentication
+
+PicoFun automatically generates authentication code for APIs that define security schemes in their OpenAPI specifications. This feature eliminates the need to manually write preprocessor hooks for common authentication methods.
+
+### Supported Authentication Methods
+
+PicoFun supports the following OpenAPI security scheme types:
+
+- **HTTP Bearer Token** (`http` with `scheme: bearer`) - Most common for modern APIs
+- **HTTP Basic Authentication** (`http` with `scheme: basic`)
+- **API Key** (`apiKey`) - Supports header, query parameter, and cookie locations
+- **Mutual TLS** (`mutualTLS`) - Client certificate authentication
+
+**Note:** OAuth2 and OpenID Connect are not yet supported and will cause an error if they are the only security schemes defined.
+
+### How It Works
+
+When you run PicoFun on an OpenAPI spec with security schemes:
+
+1. PicoFun extracts all security schemes from the `components.securitySchemes` section
+2. Filters to schemes referenced in the global `security` array
+3. Selects the highest priority supported scheme (Bearer > Basic > API Key > mTLS)
+4. Generates a `preprocessor` function in `output/layer/auth_hooks.py`
+5. Creates AWS infrastructure:
+   - SSM Parameter (SecureString) to store credentials
+   - KMS key for encryption (or uses your provided key)
+   - IAM policies for Lambda to access SSM and KMS
+
+### SSM Parameter Naming
+
+Credentials are stored in AWS Systems Manager Parameter Store with this pattern:
+
+```
+/picorun/<namespace>/credentials-<scheme-type>
+```
+
+Where `<scheme-type>` is:
+- `http` for Bearer and Basic auth
+- `api-key` for API Key auth
+- `mutual-tls` for mutual TLS
+
+Examples:
+- `/picorun/myapi/credentials-http`
+- `/picorun/zendesk/credentials-api-key`
+
+### Credential Structure
+
+Each authentication type requires specific JSON structure in the SSM parameter:
+
+**Bearer Token:**
+```json
+{
+  "token": "your-bearer-token-here"
+}
+```
+
+**Basic Authentication:**
+```json
+{
+  "username": "your-username",
+  "password": "your-password"
+}
+```
+
+**API Key:**
+```json
+{
+  "api_key": "your-api-key-value"
+}
+```
+
+**Mutual TLS:**
+```json
+{
+  "cert": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+  "key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+}
+```
+
+### Setting Up Credentials
+
+After running `terraform apply`, you must populate the SSM parameter with your actual credentials:
+
+```bash
+# Using AWS CLI
+aws ssm put-parameter \
+  --name "/picorun/myapi/credentials-http" \
+  --type "SecureString" \
+  --value '{"token":"your-actual-token"}' \
+  --overwrite
+```
+
+### Configuration Options
+
+Control authentication behavior in `picofun.toml`:
+
+```toml
+[auth]
+enabled = true        # Set to false to disable automatic authentication
+ttl_minutes = 5       # Cache credentials in Lambda memory (default: 5 minutes)
+```
+
+**Important:** You cannot use both automatic authentication and a custom `preprocessor`. If you need custom logic, set `auth.enabled = false` and implement your own preprocessor.
+
+### Custom KMS Key
+
+By default, PicoFun creates a new KMS key for encrypting credentials. To use an existing key, pass it as a Terraform variable:
+
+```hcl
+module "example_lambdas" {
+  source = "./output"
+  
+  kms_key_arn = "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
+}
+```
+
+### Environment Variable
+
+The generated Lambda functions include the `PICORUN_CREDENTIALS_TTL` environment variable, which controls how long credentials are cached in memory. This defaults to the `ttl_minutes` value from your config (converted to seconds). You can override this in Terraform:
+
+```hcl
+module "example_lambdas" {
+  source = "./output"
+  
+  auth_credentials_ttl = 600  # 10 minutes in seconds
+}
+```
+
+### Example: API with Bearer Token
+
+OpenAPI spec excerpt:
+```yaml
+openapi: "3.0.0"
+info:
+  title: Example API
+  version: "1.0"
+servers:
+  - url: https://api.example.com/v1
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+paths:
+  /users:
+    get:
+      operationId: listUsers
+      responses:
+        "200":
+          description: List of users
+```
+
+After running PicoFun:
+- `output/layer/auth_hooks.py` contains the authentication preprocessor
+- `output/main.tf` includes SSM parameter and IAM policies
+- Lambda functions automatically add `Authorization: Bearer <token>` header
+
 ## Preprocessing and Postprocessing Requests
 
-Out of the box PicoFun generates Lambda functions that make unauthenicated calls to endpoints. Often this isn't what teams need. The preprocessing and postprocessing hooks allow engineers to customize the request payload and response. A common use case for this is to add authentication headers to requests.
+Out of the box PicoFun generates Lambda functions that make unauthenticated calls to endpoints. With automatic authentication enabled (the default), PicoFun will generate authentication hooks if your OpenAPI spec defines supported security schemes. For APIs without security schemes or when you need custom logic, you can provide preprocessing and postprocessing hooks to customize the request payload and response.
+
+**Note:** You cannot use both automatic authentication and a custom `preprocessor`. If your OpenAPI spec has security schemes but you need custom preprocessing logic, set `auth.enabled = false` in your configuration file.
+
+The preprocessing and postprocessing hooks allow engineers to customize the request payload and response. Common use cases include:
+- Custom authentication not covered by automatic generation
+- Request payload transformation
+- Response data filtering or transformation
+- Custom headers or query parameters
 
 An example implementation of these hooks can be found in the [`example/zendesk_common`](example/zendesk_common) directory. The example pulls values from SSM Parameter store and uses them for the domain name and authorization header.
 

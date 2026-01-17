@@ -140,6 +140,22 @@ class UnknownConfigValueError(AttributeError):
         super().__init__("Invalid property found in config file.")
 
 
+class UnsupportedSecuritySchemeError(Exception):
+    """Exception thrown when only unsupported security schemes are found."""
+
+    def __init__(self, schemes: list[str]) -> None:
+        """
+        Initialise UnsupportedSecuritySchemeError.
+
+        :param schemes: List of unsupported scheme names found.
+        """
+        scheme_list = ", ".join(schemes)
+        super().__init__(
+            f"Only unsupported security schemes found: {scheme_list}. "
+            f"Supported types are: apiKey, http (basic/bearer), mutualTLS."
+        )
+
+
 class UnknownServerVariableError(ValueError):
     """Exception thrown when a config variable is not in the spec's server object."""
 

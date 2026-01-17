@@ -578,6 +578,24 @@ def test_auth_ttl_configured() -> None:
     assert config.auth_ttl_minutes == 10
 
 
+def test_auth_ttl_from_toml_file() -> None:
+    """Test loading custom TTL from TOML file with [auth] section."""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
+        f.write("[auth]\n")
+        f.write("enabled = true\n")
+        f.write("ttl_minutes = 15\n")
+        config_file = f.name
+
+    try:
+        loader = picofun.config.ConfigLoader(config_file)
+        config = loader.get_config()
+
+        assert config.auth_enabled is True
+        assert config.auth_ttl_minutes == 15
+    finally:
+        os.unlink(config_file)
+
+
 def test_auth_enabled_preprocessor_conflict() -> None:
     """Test conflict between auth enabled and the preprocessor configuration."""
     with pytest.raises(pydantic.ValidationError) as exc_info:

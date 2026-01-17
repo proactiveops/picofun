@@ -149,6 +149,7 @@ class UnsupportedSecuritySchemeError(Exception):
 
         :param schemes: List of unsupported scheme names found.
         """
+        self.unsupported_schemes = schemes
         scheme_list = ", ".join(schemes)
         super().__init__(
             f"Only unsupported security schemes found: {scheme_list}. "

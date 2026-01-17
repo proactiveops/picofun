@@ -1,18 +1,24 @@
 """Command line interface for picofun."""
 
+import logging
+import os
 import typing
 
 import typer
 
+import picofun.auth_generator
 import picofun.config
 import picofun.endpoint_filter
+import picofun.errors
 import picofun.lambda_generator
 import picofun.layer
+import picofun.security
 import picofun.spec
 import picofun.template
 import picofun.terraform_generator
 
 app = typer.Typer()
+logger = logging.getLogger(__name__)
 
 
 @app.command()
@@ -59,20 +65,73 @@ def main(
     spec = picofun.spec.Spec(spec_file)
     api_data = spec.parse()
 
+    # Extract and select security scheme
+    selected_scheme = None
+    auth_scheme_type = None
+    if config.auth_enabled:
+        try:
+            schemes = picofun.security.extract_security_schemes(api_data)
+            global_security = picofun.security.get_global_security(api_data)
+            selected_scheme = picofun.security.select_security_scheme(
+                schemes, global_security
+            )
+
+            if selected_scheme:
+                logger.info(
+                    "Selected security scheme: %s (%s)",
+                    selected_scheme.name,
+                    selected_scheme.type,
+                )
+                auth_scheme_type = picofun.security.get_scheme_type_kebab(
+                    selected_scheme
+                )
+            else:
+                logger.warning(
+                    "No supported security scheme found in OpenAPI spec. "
+                    "Authentication hooks will not be generated."
+                )
+        except picofun.errors.UnsupportedSecuritySchemeError as e:
+            logger.exception(
+                "OpenAPI spec contains only unsupported security schemes: %s. "
+                "Supported schemes: apiKey, http (basic/bearer), mutualTLS. "
+                "OAuth2 and OpenID Connect are not yet supported.",
+                ", ".join(e.unsupported_schemes),
+            )
+            raise typer.Exit(code=1) from e
+
     template = picofun.template.Template(config.template_path)
 
     # Create endpoint filter
     endpoint_filter = picofun.endpoint_filter.EndpointFilter(config.include_endpoints)
+
+    layer = picofun.layer.Layer(config)
+    layer.prepare()
+
+    # Generate authentication hooks if enabled and scheme selected
+    if config.auth_enabled and selected_scheme:
+        auth_hooks_code = picofun.auth_generator.generate_auth_hooks(
+            selected_scheme, namespace, config.template_path
+        )
+        auth_hooks_path = os.path.join(config.output_dir, "layer", "auth_hooks.py")
+        os.makedirs(os.path.dirname(auth_hooks_path), exist_ok=True)
+        with open(auth_hooks_path, "w") as f:
+            f.write(auth_hooks_code)
+        logger.info("Generated authentication hooks: %s", auth_hooks_path)
+
+        object.__setattr__(config, "preprocessor", "auth_hooks.preprocessor")
 
     lambda_generator = picofun.lambda_generator.LambdaGenerator(
         template, namespace, config, endpoint_filter
     )
     lambdas = lambda_generator.generate(api_data)
 
-    layer = picofun.layer.Layer(config)
-    layer.prepare()
-
     terraform_generator = picofun.terraform_generator.TerraformGenerator(
         template, namespace, config
     )
-    terraform_generator.generate(lambdas)
+    terraform_generator.generate(
+        lambdas,
+        auth_enabled=config.auth_enabled and selected_scheme is not None,
+        auth_scheme_type=auth_scheme_type,
+        auth_scheme_name=selected_scheme.name if selected_scheme else None,
+        auth_ttl=config.auth_ttl_minutes * 60,  # Convert minutes to seconds
+    )

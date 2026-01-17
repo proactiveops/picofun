@@ -375,6 +375,14 @@ class ConfigLoader:
                     config_dir, include_endpoints
                 )
 
+        # Flatten [auth] section if present
+        if "auth" in contents:
+            auth_section = contents.pop("auth")
+            if "enabled" in auth_section:
+                contents["auth_enabled"] = auth_section["enabled"]
+            if "ttl_minutes" in auth_section:
+                contents["auth_ttl_minutes"] = auth_section["ttl_minutes"]
+
         try:
             return Config(**contents)
         except ValidationError as e:

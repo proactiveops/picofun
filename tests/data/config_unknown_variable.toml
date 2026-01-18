@@ -1,0 +1,5 @@
+output_dir = "tests/data/output"
+template_path = "tests/data/templates"
+
+[server]
+variables = { unknown_var = "value" }

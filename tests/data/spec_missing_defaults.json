@@ -1,0 +1,30 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "API with Server Variables Missing Defaults"
+  },
+  "servers": [
+    {
+      "url": "https://{subdomain}.example.com/api",
+      "variables": {
+        "subdomain": {
+          "description": "The subdomain (no default)"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/test": {
+      "get": {
+        "summary": "Test endpoint",
+        "operationId": "testGet",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }
+}

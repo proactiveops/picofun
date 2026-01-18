@@ -1,0 +1,39 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "API with Server Variables"
+  },
+  "servers": [
+    {
+      "url": "https://{subdomain}.{domain}.com/api/{version}",
+      "variables": {
+        "subdomain": {
+          "default": "api",
+          "description": "The subdomain"
+        },
+        "domain": {
+          "default": "example",
+          "description": "The domain"
+        },
+        "version": {
+          "default": "v1",
+          "description": "API version"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/test": {
+      "get": {
+        "summary": "Test endpoint",
+        "operationId": "testGet",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }
+}

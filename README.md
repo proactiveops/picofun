@@ -41,9 +41,40 @@ subnets=[ # default is none. Must be set if vpc_id is set
 template_path="/path/to/templates" # default is current-working-directory/templates
 xray_tracing=false # default is to enable xray tracing, set this to false to turn it off
 vpc_id = "vpc-0011223344556677f" # Default is none. Must be set if using subnets
+[server] # Optional: Override or customize server URLs from OpenAPI spec
+url = "https://api.example.com" # Full URL override (mutually exclusive with variables)
+# OR
+variables = { subdomain = "api", version = "v2" } # Override server URL variables
 [tags] # defaults to none
 key="value"
 anotherKey="some other value"
+```
+
+### Server URL Configuration
+
+Some OpenAPI specs define server URLs with variables (e.g., `https://{subdomain}.example.com/api/{version}`). The `[server]` block allows you to:
+
+1. **Override the entire server URL**: Use `url` to replace the spec's server URL completely
+2. **Customize server variables**: Use `variables` to provide or override default values for tokenized URLs
+
+**Note**: `url` and `variables` are mutually exclusive. You must use one or the other, not both.
+
+**Examples**:
+
+```toml
+# Override the entire server URL
+[server]
+url = "https://production.api.example.com"
+```
+
+```toml
+# Override specific variables in a tokenized URL
+# If spec has: https://{environment}.example.com/api/{version}
+[server]
+variables = { environment = "staging", version = "v2" }
+```
+
+Server variables from the config override any defaults in the spec. Variables without defaults (in either spec or config) trigger a fatal error.
 ```
 
 ## Usage
@@ -66,7 +97,8 @@ While the `config.toml` file is the preferred way to manage the configuration fo
   --config-file  # Full path to the alternate configuration file
   --output-dir   # Directory to output the generated files
   --layers       # Comma separated list of Lambda layer ARNs to include in the function configuration
-  --bundle       # Path to code to bundle into a layer. If requirements.txt present pip install will be run.  
+  --bundle       # Path to code to bundle into a layer. If requirements.txt present pip install will be run.
+  --server-url   # Override server URL in the spec. Ignores any [server] config in picofun.toml
 ```
 
 Here is an example of overriding the configuration file:
@@ -84,6 +116,16 @@ Commonly the layers argument is used to provide different layer ARNs based on th
 uv -m picofun --layers "arn:aws:lambda:us-east-1:012345678912:layer:example:1,arn:aws:lambda:us-east-1:012345678912:layer:another-example:123" example example.yaml
 
 ```
+
+The `--server-url` overrides the default server url. This can help with testing different environments.
+
+```bash
+
+uv -m picofun --server-url "https://staging-api.example.com" example example.yaml
+
+```
+
+**Note**: When `--server-url` is provided, it takes precedence over any `[server]` configuration in `picofun.toml`.
 
 ## Bundle
 

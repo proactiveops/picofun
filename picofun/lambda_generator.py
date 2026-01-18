@@ -8,6 +8,7 @@ import typing
 import black
 
 import picofun.config
+import picofun.endpoint_filter
 import picofun.template
 
 logger = logging.getLogger(__name__)
@@ -23,10 +24,14 @@ class LambdaGenerator:
         template: picofun.template.Template,
         namespace: str,
         config: picofun.config.Config,
+        endpoint_filter: picofun.endpoint_filter.EndpointFilter | None = None,
     ) -> None:
         """Initialize the lambda generator."""
         self._template = template
         self._config = config.model_dump()
+        self._endpoint_filter = (
+            endpoint_filter or picofun.endpoint_filter.EndpointFilter()
+        )
 
         self.max_length = 64 - len(f"{namespace}_")
         # Remove one for the underscore between the prefix and the suffix.
@@ -64,6 +69,13 @@ class LambdaGenerator:
         for path, path_details in api_data["paths"].items():
             for method, details in path_details.items():
                 if method not in ["get", "put", "post", "delete", "patch", "head"]:
+                    continue
+
+                # Check if endpoint should be included
+                if not self._endpoint_filter.is_included(path, method, details):
+                    logger.debug(
+                        "Skipping excluded endpoint: %s %s", method.upper(), path
+                    )
                     continue
 
                 lambda_name = self._get_name(method, path)

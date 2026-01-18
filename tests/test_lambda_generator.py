@@ -1,8 +1,12 @@
 """Tests for the LambdaGenerator class."""
 
+import os
 import tempfile
 
+import yaml
+
 import picofun.config
+import picofun.endpoint_filter
 import picofun.lambda_generator
 import picofun.template
 
@@ -164,3 +168,49 @@ def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
     return out.asdict()
 """
     )
+
+
+def test_generate_with_filter() -> None:
+    """Test generating lambda functions with endpoint filter."""
+    spec = {
+        "swagger": "2.0",
+        "info": {"title": "Simple API overview", "version": "v2"},
+        "servers": [{"url": "https://example.com"}],
+        "paths": {
+            "/users": {
+                "get": {
+                    "operationId": "getUsers",
+                    "summary": "Get users",
+                },
+            },
+            "/orders": {
+                "get": {
+                    "operationId": "getOrders",
+                    "summary": "Get orders",
+                },
+            },
+        },
+    }
+
+    # Create a filter that only includes /users
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+        yaml.dump({"paths": [{"path": "/users"}]}, f)
+        f.flush()
+        filter_file = f.name
+
+    try:
+        endpoint_filter = picofun.endpoint_filter.EndpointFilter(filter_file)
+        tpl = picofun.template.Template("tests/data/templates")
+        config = picofun.config.Config()
+
+        with tempfile.TemporaryDirectory() as out_dir:
+            config.output_dir = out_dir
+            generator = picofun.lambda_generator.LambdaGenerator(
+                tpl, "", config, endpoint_filter
+            )
+            lambdas = generator.generate(spec)
+
+            # Only /users should be generated, /orders should be filtered out
+            assert lambdas == ["get_users"]
+    finally:
+        os.unlink(filter_file)

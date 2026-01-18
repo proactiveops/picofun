@@ -368,3 +368,43 @@ def test_configloader_get_config() -> None:
     assert isinstance(config, picofun.config.Config)
     assert len(config.layers) == 2
     assert str(config.output_dir) == os.path.realpath("tests/data/output")
+
+
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        ("", ""),
+        ("/tmp/filter.yaml", "/tmp/filter.yaml"),
+        ("relative/filter.yaml", os.path.realpath("relative/filter.yaml")),
+    ],
+)
+def test_config_include_endpoints_validator(path: str, expected: str) -> None:
+    """Test the include_endpoints validator."""
+    result = picofun.config.Config.validate_include_endpoints(path)
+    if expected == "":
+        assert result == ""
+    else:
+        assert result == os.path.realpath(expected)
+
+
+def test_configloader_include_endpoints_relative() -> None:
+    """Test loading a configuration with include_endpoints relative path."""
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        # Create a config file with include_endpoints
+        config_path = os.path.join(tmp_dir, "picofun.toml")
+        with open(config_path, "w") as f:
+            f.write('include_endpoints = "filter.yaml"\n')
+
+        # Create a dummy filter file
+        filter_path = os.path.join(tmp_dir, "filter.yaml")
+        with open(filter_path, "w") as f:
+            f.write("paths:\n  - path: /test\n")
+
+        loader = picofun.config.ConfigLoader(config_path)
+        config = loader.get_config()
+
+        # The relative path should be resolved relative to the config file
+        # Use os.path.realpath to normalize both paths (handles /var vs /private/var on macOS)
+        assert os.path.realpath(config.include_endpoints) == os.path.realpath(
+            filter_path
+        )

@@ -43,6 +43,40 @@ class DownloadSpecHTTPError(Exception):
         )
 
 
+class EndpointFilterEmptyFileError(Exception):
+    """Exception thrown when the endpoint filter file is empty or contains no filters."""
+
+    def __init__(self) -> None:
+        """Initialise EndpointFilterEmptyFileError."""
+        super().__init__(
+            "Endpoint filter file is empty or contains no filters (paths, operationIds, or tags)"
+        )
+
+
+class EndpointFilterFileNotFoundError(FileNotFoundError):
+    """Exception thrown when the endpoint filter file cannot be found."""
+
+    def __init__(self, path: str) -> None:
+        """
+        Initialise EndpointFilterFileNotFoundError.
+
+        :param path: The path to the filter file.
+        """
+        super().__init__(f"Endpoint filter file not found: {path}")
+
+
+class EndpointFilterInvalidYAMLError(Exception):
+    """Exception thrown when the endpoint filter file contains invalid YAML."""
+
+    def __init__(self, error: Exception) -> None:
+        """
+        Initialise EndpointFilterInvalidYAMLError.
+
+        :param error: The YAML parsing error.
+        """
+        super().__init__(f"Invalid YAML in endpoint filter file: {error}")
+
+
 class InvalidConfigError(Exception):
     """Exception thrown when the config file is not valid TOML."""
 

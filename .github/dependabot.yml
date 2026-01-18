@@ -1,11 +1,12 @@
 version: 2
+
 updates:
-- package-ecosystem: uv
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "02:00"
-  groups:
-    python:
-      patterns:
-        - "pytest*"
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "02:00"
+    groups:
+      python:
+        patterns:
+          - "pytest*"

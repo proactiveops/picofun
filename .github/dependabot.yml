@@ -10,3 +10,11 @@ updates:
       pytest:
         patterns:
           - "pytest*"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "03:00"
+    open-pull-requests-limit: 5

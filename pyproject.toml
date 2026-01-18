@@ -17,7 +17,9 @@ dependencies = [
   "typer==0.15.2",
 ]
 
-license = {file = "LICENSE.txt"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+
 readme = "README.md"
 
 dynamic = ["version"]

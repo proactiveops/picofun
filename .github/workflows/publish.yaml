@@ -18,21 +18,23 @@ jobs:
     steps:
     - name: Checkout
       id: checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
-    - name: Setup Python
-      id: python
-      uses: actions/setup-python@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
       with:
-        python-version: '3.10'
+        activate-environment: true
+
+    - name: Set up Python
+      run: uv python install
 
     - name: Build
       id: build
       run: |
-        python -m pip install '.[build]'
-        python -m build
+        uv sync --group=build
+        uv run -m build
         twine check --strict dist/*
 
     - name: Publish on PyPI

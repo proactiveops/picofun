@@ -5,6 +5,7 @@ import typing
 import typer
 
 import picofun.config
+import picofun.endpoint_filter
 import picofun.lambda_generator
 import picofun.layer
 import picofun.spec
@@ -53,8 +54,11 @@ def main(
 
     template = picofun.template.Template(config.template_path)
 
+    # Create endpoint filter
+    endpoint_filter = picofun.endpoint_filter.EndpointFilter(config.include_endpoints)
+
     lambda_generator = picofun.lambda_generator.LambdaGenerator(
-        template, namespace, config
+        template, namespace, config, endpoint_filter
     )
     lambdas = lambda_generator.generate(api_data)
 

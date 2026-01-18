@@ -1,0 +1,13 @@
+paths:
+  # Create a new ticket
+  - path:  /api/v2/tickets
+    methods: [post]
+  # Fetch a ticket
+  - path:  /api/v2/tickets/{ticket_id}
+    methods: [get]
+  # Fetch comments for a ticket
+  - path:  /api/v2/tickets/{ticket_id}/comments
+    methods: [get]
+  # Fetch user details
+  - path:  /api/v2/users/{user_id}
+    methods: [get]

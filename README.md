@@ -25,6 +25,7 @@ The configuration file has the following structure:
 ```toml
 bundle="/path/containing/code/to/bundle/into/build" # default is none
 iam_role_prefix="my-prefix-" # default is "pf-" for PicoFun
+include_endpoints="include-endpoints.yaml" # default is none, generates all endpoints if omitted
 layers=[ # default is none, but if AWS Powertools isn't present it is added
   "arn:aws:lambda:us-east-1:012345678910:layer:example:1",
   "arn:aws:lambda:us-east-1:012345678910:layer:another-example:123"
@@ -89,6 +90,46 @@ uv -m picofun --layers "arn:aws:lambda:us-east-1:012345678912:layer:example:1,ar
 PicoFun supports bundling code into a Lambda layer. The code to bundle is specified using the `bundle` entry in the configuration file or the `--bundle` argument on the command line. If a `requirements.txt` file is present in the bundle directory, `pip install` will be run by terraform before creating the layer.
 
 The most common use case for using code bundles is to include pre and post processors.
+
+## Endpoint Filtering
+
+By default, PicoFun generates Lambda functions for all endpoints in the OpenAPI spec. To generate functions for only specific endpoints, create an allowlist file and reference it in your configuration.
+
+Add to `picofun.toml`:
+
+```toml
+include_endpoints = "include-endpoints.yaml"
+```
+
+Create `include-endpoints.yaml`:
+
+```yaml
+# Include endpoints matching any of these paths
+# Supports trailing wildcards: * (single segment), ** (multiple segments)
+paths:
+  - path: /users
+    methods: [get, post]  # Optional: if omitted, all methods allowed
+  - path: /orders/*
+  - path: /products/**
+
+# Include endpoints with these operationIds
+operationIds:
+  - getUser
+  - createOrder
+
+# Include endpoints with any of these tags
+tags:
+  - public
+  - v2
+```
+
+Endpoints are included if they match ANY of the criteria (OR logic). If `include_endpoints` is not specified, all endpoints are generated.
+
+The path patterns support two types of wildcards:
+- `*` matches a single path segment (e.g., `/users/*` matches `/users/123` but not `/users/123/orders`)
+- `**` matches multiple path segments (e.g., `/users/**` matches `/users/123` and `/users/123/orders`)
+
+When specifying methods for a path, the matching is case-insensitive. If no methods are specified for a path entry, all HTTP methods are allowed for that path.
 
 ## Preprocessing and Postprocessing Requests
 

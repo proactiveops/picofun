@@ -23,6 +23,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     bundle: str = None
     iam_role_prefix: str = "pf-"
+    include_endpoints: str = None
     layers: list[str] = [AWS_POWER_TOOLS_LAYER_ARN]
     output_dir: DirectoryPath = os.path.realpath(os.path.join(os.getcwd(), "output"))
     postprocessor: str = ""
@@ -73,6 +74,31 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
             raise ValueError(f"Bundle path not found: {bundle_path}")  # noqa TRY003 This is a valid use case for a ValueError.
 
         return bundle_path
+
+    @field_validator("include_endpoints", mode="before")
+    @classmethod
+    def validate_include_endpoints(cls: "Config", value: str) -> str:
+        """
+        Check if include_endpoints is a valid path.
+
+        Args:
+        ----
+            value: The value to validate.
+
+        Returns:
+        -------
+            str: The validated value.
+
+        """
+        if not value:
+            return value
+
+        if not os.path.isabs(value):
+            include_endpoints_path = os.path.realpath(os.path.join(os.getcwd(), value))
+        else:
+            include_endpoints_path = os.path.realpath(value)
+
+        return include_endpoints_path
 
     @field_validator("layers", mode="before")
     @classmethod
@@ -267,6 +293,15 @@ class ConfigLoader:
                 contents = tomlkit.load(file)
             except tomlkit.exceptions.ParseError as e:
                 raise picofun.errors.InvalidConfigError() from e
+
+        # Resolve include_endpoints path relative to config file location
+        if contents.get("include_endpoints"):
+            include_endpoints = contents["include_endpoints"]
+            if not os.path.isabs(include_endpoints):
+                config_dir = os.path.dirname(path)
+                contents["include_endpoints"] = os.path.join(
+                    config_dir, include_endpoints
+                )
 
         try:
             return Config(**contents)

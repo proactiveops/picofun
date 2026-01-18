@@ -32,10 +32,35 @@ def test_download_spec_http_error() -> None:
         raise picofun.errors.DownloadSpecHTTPError(exception)
 
 
+def test_endpoint_filter_empty_file_error() -> None:
+    """Test EndpointFilterEmptyFileError."""
+    with pytest.raises(picofun.errors.EndpointFilterEmptyFileError):
+        raise picofun.errors.EndpointFilterEmptyFileError()
+
+
+def test_endpoint_filter_file_not_found_error() -> None:
+    """Test EndpointFilterFileNotFoundError."""
+    with pytest.raises(picofun.errors.EndpointFilterFileNotFoundError):
+        raise picofun.errors.EndpointFilterFileNotFoundError("/path/to/filter.yaml")
+
+
+def test_endpoint_filter_invalid_yaml_error() -> None:
+    """Test EndpointFilterInvalidYAMLError."""
+    yaml_error = Exception("could not determine a constructor")
+    with pytest.raises(picofun.errors.EndpointFilterInvalidYAMLError):
+        raise picofun.errors.EndpointFilterInvalidYAMLError(yaml_error)
+
+
 def test_invalid_config_error() -> None:
     """Test InvalidConfigError."""
     with pytest.raises(picofun.errors.InvalidConfigError):
         raise picofun.errors.InvalidConfigError()
+
+
+def test_invalid_config_type_error() -> None:
+    """Test InvalidConfigTypeError."""
+    with pytest.raises(picofun.errors.InvalidConfigTypeError):
+        raise picofun.errors.InvalidConfigTypeError("example", [], str)
 
 
 def test_invalid_spec_error() -> None:
@@ -48,9 +73,3 @@ def test_unknown_config_value_error() -> None:
     """Test UnknownConfigValueError."""
     with pytest.raises(picofun.errors.UnknownConfigValueError):
         raise picofun.errors.UnknownConfigValueError()
-
-
-def test_invalid_config_type_error() -> None:
-    """Test InvalidConfigTypeError."""
-    with pytest.raises(picofun.errors.InvalidConfigTypeError):
-        raise picofun.errors.InvalidConfigTypeError("example", [], str)

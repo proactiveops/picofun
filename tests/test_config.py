@@ -276,7 +276,7 @@ def test_config_merge_invalid_type() -> None:
     config = picofun.config.Config()
 
     with pytest.raises(
-        TypeError, match="expected str, bytes or os.PathLike object, not int"
+        TypeError, match="expected str, bytes or os\\.PathLike object, not int"
     ):
         config.merge(output_dir=1234)
 

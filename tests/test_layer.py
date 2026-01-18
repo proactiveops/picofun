@@ -26,7 +26,7 @@ def test_prepare_with_bundle() -> None:
         config.bundle = bundle_dir
 
         with tempfile.TemporaryDirectory() as out_dir:
-            (fp, filename) = tempfile.mkstemp(dir=bundle_dir)
+            (_, filename) = tempfile.mkstemp(dir=bundle_dir)
             config.output_dir = out_dir
 
             assert os.path.isfile(filename)

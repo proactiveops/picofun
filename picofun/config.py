@@ -15,7 +15,7 @@ from pydantic import (
 
 import picofun.errors
 
-AWS_POWER_TOOLS_LAYER_ARN = "arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:7"
+AWS_POWER_TOOLS_LAYER_ARN = "arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:27"
 
 
 class Config(BaseModel, extra="forbid", validate_assignment=True):

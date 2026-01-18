@@ -40,6 +40,12 @@ def main(
             help="Path to code to bundle into a layer. If pyproject.toml present uv sync will be run."
         ),
     ] = None,
+    server_url: typing.Annotated[
+        str | None,
+        typer.Option(
+            help="Override server URL from OpenAPI spec. Ignores any server config in picofun.toml."
+        ),
+    ] = None,
 ) -> None:
     """Generate lambda functions and terraform configuration to call REST APIs."""
     config = picofun.config.ConfigLoader(config_file).get_config()
@@ -47,6 +53,7 @@ def main(
         output_dir=output_dir,
         layers=layers,
         bundle=bundle,
+        server_url=server_url,
     )
 
     spec = picofun.spec.Spec(spec_file)

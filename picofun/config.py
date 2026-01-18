@@ -18,6 +18,27 @@ import picofun.errors
 AWS_POWER_TOOLS_LAYER_ARN = "arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:27"
 
 
+class ServerConfig(BaseModel, extra="forbid"):
+    """Server configuration for overriding OpenAPI spec server URLs."""
+
+    url: str | None = None
+    variables: dict[str, str] | None = None
+
+    @model_validator(mode="after")
+    def validate_mutual_exclusivity(self) -> "ServerConfig":
+        """
+        Ensure url and variables are mutually exclusive.
+
+        Raises
+        ------
+            InvalidServerConfigError: If both url and variables are specified.
+
+        """
+        if self.url is not None and self.variables is not None:
+            raise picofun.errors.InvalidServerConfigError()
+        return self
+
+
 class Config(BaseModel, extra="forbid", validate_assignment=True):
     """Configuration management class."""
 
@@ -29,6 +50,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
     postprocessor: str = ""
     preprocessor: str = ""
     role_permissions_boundary: str = None
+    server: ServerConfig | None = None
     subnets: list[str] = []
     tags: dict[str, typing.Any] = {}
     template_path: DirectoryPath = os.path.join(files("picofun"), "templates")
@@ -221,6 +243,13 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
             kwargs: The CLI arguments.
 
         """
+        # Handle server_url CLI override - it takes precedence and ignores config file
+        server_url = kwargs.get("server_url")
+        if server_url:
+            self.server = ServerConfig(url=server_url)
+            # Don't process server_url further
+            kwargs = {k: v for k, v in kwargs.items() if k != "server_url"}
+
         for key in kwargs:
             if kwargs[key]:
                 setattr(self, key, kwargs[key])

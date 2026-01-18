@@ -408,3 +408,136 @@ def test_configloader_include_endpoints_relative() -> None:
         assert os.path.realpath(config.include_endpoints) == os.path.realpath(
             filter_path
         )
+
+
+def test_server_config_url_only() -> None:
+    """Test ServerConfig with only URL specified."""
+    server_config = picofun.config.ServerConfig(url="https://example.com")
+    assert server_config.url == "https://example.com"
+    assert server_config.variables is None
+
+
+def test_server_config_variables_only() -> None:
+    """Test ServerConfig with only variables specified."""
+    server_config = picofun.config.ServerConfig(
+        variables={"subdomain": "api", "version": "v1"}
+    )
+    assert server_config.url is None
+    assert server_config.variables == {"subdomain": "api", "version": "v1"}
+
+
+def test_server_config_mutual_exclusivity() -> None:
+    """Test ServerConfig raises error when both url and variables are specified."""
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        picofun.config.ServerConfig(
+            url="https://example.com", variables={"subdomain": "api"}
+        )
+
+    # Verify the error message contains our custom error
+    assert "mutually exclusive" in str(exc_info.value)
+
+
+def test_server_config_empty() -> None:
+    """Test ServerConfig with no values specified."""
+    server_config = picofun.config.ServerConfig()
+    assert server_config.url is None
+    assert server_config.variables is None
+
+
+def test_config_with_server_url() -> None:
+    """Test Config with server URL override."""
+    config = picofun.config.Config(
+        server=picofun.config.ServerConfig(url="https://override.example.com")
+    )
+    assert config.server.url == "https://override.example.com"
+    assert config.server.variables is None
+
+
+def test_config_with_server_variables() -> None:
+    """Test Config with server variables."""
+    config = picofun.config.Config(
+        server=picofun.config.ServerConfig(
+            variables={"subdomain": "custom", "domain": "test"}
+        )
+    )
+    assert config.server.url is None
+    assert config.server.variables == {"subdomain": "custom", "domain": "test"}
+
+
+def test_config_without_server() -> None:
+    """Test Config without server configuration."""
+    config = picofun.config.Config()
+    assert config.server is None
+
+
+def test_configloader_with_server_url() -> None:
+    """Test loading a configuration file with server URL override."""
+    loader = picofun.config.ConfigLoader("tests/data/config_server_url.toml")
+    config = loader.get_config()
+
+    assert config.server is not None
+    assert config.server.url == "https://override.example.com"
+    assert config.server.variables is None
+
+
+def test_configloader_with_server_variables() -> None:
+    """Test loading a configuration file with server variables."""
+    loader = picofun.config.ConfigLoader("tests/data/config_server_variables.toml")
+    config = loader.get_config()
+
+    assert config.server is not None
+    assert config.server.url is None
+    assert config.server.variables == {"subdomain": "custom", "domain": "test"}
+
+
+def test_configloader_with_server_both() -> None:
+    """Test loading a configuration file with both url and variables raises error."""
+    with pytest.raises(picofun.errors.UnknownConfigValueError) as exc_info:
+        picofun.config.ConfigLoader("tests/data/config_server_both.toml")
+
+    # Verify this is caused by our validation error
+    assert isinstance(exc_info.value.__cause__, pydantic.ValidationError)
+
+
+def test_config_merge_with_server_url() -> None:
+    """Test merging config with server_url CLI argument."""
+    config = picofun.config.Config(
+        server=picofun.config.ServerConfig(variables={"subdomain": "api"})
+    )
+
+    # Merge with server_url should override and ignore existing config
+    config.merge(server_url="https://cli-override.example.com")
+
+    assert config.server is not None
+    assert config.server.url == "https://cli-override.example.com"
+    assert config.server.variables is None
+
+
+def test_config_merge_with_server_url_none() -> None:
+    """Test merging config with None server_url preserves existing config."""
+    config = picofun.config.Config(
+        server=picofun.config.ServerConfig(variables={"subdomain": "api"})
+    )
+
+    # Merge with None server_url should preserve existing config
+    config.merge(server_url=None, layers="arn:aws:lambda:test")
+
+    assert config.server is not None
+    assert config.server.url is None
+    assert config.server.variables == {"subdomain": "api"}
+
+
+def test_config_merge_with_server_url_overrides_file_config() -> None:
+    """Test that CLI server_url overrides file-based server config."""
+    loader = picofun.config.ConfigLoader("tests/data/config_server_variables.toml")
+    config = loader.get_config()
+
+    # Verify initial state from file
+    assert config.server is not None
+    assert config.server.variables == {"subdomain": "custom", "domain": "test"}
+
+    # CLI override should replace it completely
+    config.merge(server_url="https://cli.example.com")
+
+    assert config.server.url == "https://cli.example.com"
+    assert config.server.variables is None

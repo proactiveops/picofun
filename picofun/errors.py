@@ -100,6 +100,16 @@ class InvalidConfigTypeError(TypeError):
         )
 
 
+class InvalidServerConfigError(ValueError):
+    """Exception thrown when server config has both url and variables specified."""
+
+    def __init__(self) -> None:
+        """Initialise InvalidServerConfigError."""
+        super().__init__(
+            "Server configuration cannot have both 'url' and 'variables' specified. They are mutually exclusive."
+        )
+
+
 class InvalidSpecError(Exception):
     """Exception thrown when the spec file is not valid JSON or YAML."""
 
@@ -108,9 +118,39 @@ class InvalidSpecError(Exception):
         super().__init__("The spec file isn't valid JSON or YAML")
 
 
+class MissingServerVariableError(ValueError):
+    """Exception thrown when a server variable lacks a default value."""
+
+    def __init__(self, variable: str) -> None:
+        """
+        Initialise MissingServerVariableError.
+
+        :param variable: The name of the variable missing a default value.
+        """
+        super().__init__(
+            f"Server variable '{variable}' does not have a default value in the spec and was not provided in config."
+        )
+
+
 class UnknownConfigValueError(AttributeError):
     """Exception thrown when an unknown configuration value is specified."""
 
     def __init__(self) -> None:
         """Initialise UnknownConfigValueError."""
         super().__init__("Invalid property found in config file.")
+
+
+class UnknownServerVariableError(ValueError):
+    """Exception thrown when a config variable is not in the spec's server object."""
+
+    def __init__(self, variable: str, available_variables: list[str]) -> None:
+        """
+        Initialise UnknownServerVariableError.
+
+        :param variable: The unknown variable name.
+        :param available_variables: List of available variables in the spec.
+        """
+        available = ", ".join(available_variables) if available_variables else "none"
+        super().__init__(
+            f"Server variable '{variable}' in config is not defined in the spec. Available variables: {available}"
+        )

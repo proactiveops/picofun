@@ -37,7 +37,7 @@ build = [
 
 [build-system]
 requires = [
-  "setuptools==79.0.1",
+  "setuptools==80.9.0",
   "setuptools-git-versioning==2.1.0",
   "wheel==0.46.1",
 ]

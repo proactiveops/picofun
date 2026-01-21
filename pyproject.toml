@@ -8,7 +8,7 @@ description = "PicoFun AWS Lambda generator"
 requires-python = ">=3.13"
 
 dependencies = [
-  "black==25.12.0", # ruff can't be invoked from code without shelling out
+  "black==26.1.0", # ruff can't be invoked from code without shelling out
   "jinja2==3.1.6",
   "pydantic==2.12.5",
   "PyYAML==6.0.3",

@@ -541,3 +541,82 @@ def test_config_merge_with_server_url_overrides_file_config() -> None:
 
     assert config.server.url == "https://cli.example.com"
     assert config.server.variables is None
+
+
+def test_auth_enabled_default_true() -> None:
+    """Test that auth_enabled defaults to True when not configured."""
+    config = picofun.config.Config()
+
+    assert config.auth_enabled is True
+
+
+def test_auth_enabled_missing_section() -> None:
+    """Test that auth_enabled is True when [auth] section missing."""
+    config = picofun.config.Config()
+
+    assert config.auth_enabled is True
+
+
+def test_auth_enabled_explicit_false() -> None:
+    """Test explicit disable in TOML."""
+    config = picofun.config.Config(auth_enabled=False)
+
+    assert config.auth_enabled is False
+
+
+def test_auth_ttl_default() -> None:
+    """Test default TTL value."""
+    config = picofun.config.Config()
+
+    assert config.auth_ttl_minutes == 5
+
+
+def test_auth_ttl_configured() -> None:
+    """Test custom TTL from TOML."""
+    config = picofun.config.Config(auth_ttl_minutes=10)
+
+    assert config.auth_ttl_minutes == 10
+
+
+def test_auth_ttl_from_toml_file() -> None:
+    """Test loading custom TTL from TOML file with [auth] section."""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
+        f.write("[auth]\n")
+        f.write("enabled = true\n")
+        f.write("ttl_minutes = 15\n")
+        config_file = f.name
+
+    try:
+        loader = picofun.config.ConfigLoader(config_file)
+        config = loader.get_config()
+
+        assert config.auth_enabled is True
+        assert config.auth_ttl_minutes == 15
+    finally:
+        os.unlink(config_file)
+
+
+def test_auth_enabled_preprocessor_conflict() -> None:
+    """Test conflict between auth enabled and the preprocessor configuration."""
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        picofun.config.Config(auth_enabled=True, preprocessor="custom.preprocessor")
+
+    assert "auth_enabled" in str(exc_info.value) or "preprocessor" in str(
+        exc_info.value
+    )
+
+
+def test_auth_ttl_validation_zero() -> None:
+    """Test zero TTL rejected."""
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        picofun.config.Config(auth_ttl_minutes=0)
+
+    assert "auth_ttl_minutes" in str(exc_info.value)
+
+
+def test_auth_ttl_validation_negative() -> None:
+    """Test negative TTL rejected."""
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        picofun.config.Config(auth_ttl_minutes=-5)
+
+    assert "auth_ttl_minutes" in str(exc_info.value)

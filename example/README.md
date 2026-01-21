@@ -2,31 +2,6 @@
 
 This example PicoFun project demonstrates generating Lambdas for the [Zendesk Ticketing API](https://developer.zendesk.com/api-reference/ticketing/introduction/).
 
-## Setup
-
-The project depends on two values being available in [SSM Parameter Store](https://www.davehall.com.au/blog/2021/02/22/parameter-store-vs-secrets-manager/). Add these values before deploying the project:
-
-### `/picorun_zendesk/subdomain`
-
-Set this as a type `String`, with a `text` data type. The value should be the subdomain of your Zendesk instance. If you access Zendesk via https://example.zendesk.com, then you would use `example` as the value. This is not a senstive value, so it doesn't need encrypting.
-
-### `/picorun_zendesk/creds`
-
-These are the credentials used to access your Zendesk instance. *These are sensitive values, so you must encrypt them.** Set the type to `SecureString`. 
-
-The IAM policy in `extra.tf` assumes that you're using the AWS managed key `alias/aws/ssm`. You can use a Customer Managed Key for encrypting the creds, but if you do so you will need to adjust the policy.
-
-Set the value to `{"email":"[email]","token":"[token]"}`. Replace `[email]` with the email address of the agent or administrator who the Lambdas will act on behalf of. Use your [Zendesk API token](https://support.zendesk.com/hc/en-us/articles/4408889192858-Managing-access-to-the-Zendesk-API#topic_bsw_lfg_mmb) instead of `[token]`.
-
-If my agent email address was user.name@example.com the JSON would look like so:
-
-```json
-{
-  "email": "user.name@example.com",
-  "token": "get_your_own_api_token_using_the_docs_linked_above"
-}
-```
-
 ## Generating Lambdas
 
 To generate the Lambda functions and associated Terraform, you can run the following commmand:
@@ -87,6 +62,29 @@ Do you want to perform these actions?
 ```
 
 Review scrollback to ensure everything looks in order. When you're confident things look ok, type `yes` and hit [enter]. Go make a cup of tea, then bake a cake, make another cup of tea, eat the cake, drink both cups of tea, and then your lambda should have deployed.
+
+## Credentials
+
+The project depends on credentials being available in [SSM Parameter Store](https://www.davehall.com.au/blog/2021/02/22/parameter-store-vs-secrets-manager/). The pipeline creates the parameter, but you will need to update it after deploying the project.
+
+### `/picorun/zendesk/credentials-http`
+
+These are the credentials used to access your Zendesk instance. *These are sensitive values, so you must encrypt them.** Set the type to `SecureString`. 
+
+The IAM policy assumes that you're using the AWS managed key `alias/aws/ssm`. You can use a Customer Managed Key for encrypting the creds, but if you do so you will need to adjust override the template to adjust the policy.
+
+Set the value to `{"email":"[email]","token":"[token]"}`. Replace `[email]` with the email address of the agent or administrator who the Lambdas will act on behalf of. Use your [Zendesk API token](https://support.zendesk.com/hc/en-us/articles/4408889192858-Managing-access-to-the-Zendesk-API#topic_bsw_lfg_mmb) instead of `[token]`.
+
+If my agent email address was user.name@example.com the JSON would look like so:
+
+```json
+{
+  "username": "user.name@example.com/token",
+  "password": "get_your_own_api_token_using_the_docs_linked_above"
+}
+```
+
+This is a once off action.
 
 ## GitHub Action
 

@@ -26,6 +26,10 @@ class TerraformGenerator:
     def generate(
         self,
         lambdas: list[str],
+        auth_enabled: bool = False,
+        auth_scheme_type: str | None = None,
+        auth_scheme_name: str | None = None,
+        auth_ttl: int = 300,
     ) -> None:
         """Generate terraform configuration for the Lambda functions."""
         output_dir = self._config.output_dir
@@ -33,6 +37,10 @@ class TerraformGenerator:
         template = self._template.get("main.tf.j2")
 
         terraform_content = template.render(
+            auth_enabled=auth_enabled,
+            auth_scheme_name=auth_scheme_name,
+            auth_scheme_type=auth_scheme_type,
+            auth_ttl=auth_ttl,
             bundle=self._config.bundle,
             iam_role_prefix=self._config.iam_role_prefix,
             lambdas=lambdas,

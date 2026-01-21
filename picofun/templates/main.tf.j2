@@ -91,7 +91,7 @@ resource "aws_security_group" "lambda" {
   tags = var.tags
 }
 {% endif %}
-resource "null_resource" "layer" {
+resource "terraform_data" "layer" {
   provisioner "local-exec" {
     command = <<EOT
       rm -rf ${local.lambda_layer_path}
@@ -102,9 +102,9 @@ resource "null_resource" "layer" {
     EOT
   }
 
-  triggers = {
-    always_run = timestamp()
-  }
+  triggers_replace = [
+    timestamp()
+  ]
 }
 
 data "archive_file" "layer" {
@@ -112,7 +112,7 @@ data "archive_file" "layer" {
   output_path = "${local.temp_path}/layer_{{ namespace }}.zip"
   type        = "zip"
 
-  depends_on = [null_resource.layer]
+  depends_on = [terraform_data.layer]
 }
 
 resource "aws_lambda_layer_version" "this" {

@@ -17,22 +17,18 @@ jobs:
       contents: read
 
     steps:
-      - name: Check out code
-        id: checkout
-        uses: actions/checkout@v4
+      - name: checkout
+        uses: actions/checkout@v6
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
-      - name: Install pipx
-        id: install-pipx
-        run: pip install pipx
+      - name: Set up Python
+        run: uv python install
 
       - name: Run PicoFun
         id: run-picofun
-        run: pipx run picofun --config-file picofun.toml zendesk https://developer.zendesk.com/zendesk/oas.yaml
+        run: uvx run picofun --config-file picofun.toml zendesk https://developer.zendesk.com/zendesk/oas.yaml
 
       - name: Copy Extra Terraform Files
         id: copy-extra-tf-files

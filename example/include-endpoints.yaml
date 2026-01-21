@@ -2,9 +2,9 @@ paths:
   # Create a new ticket
   - path:  /api/v2/tickets
     methods: [post]
-  # Fetch a ticket
+  # Fetch and update ticket
   - path:  /api/v2/tickets/{ticket_id}
-    methods: [get]
+    methods: [get, put]
   # Fetch comments for a ticket
   - path:  /api/v2/tickets/{ticket_id}/comments
     methods: [get]

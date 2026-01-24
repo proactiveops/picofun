@@ -121,7 +121,7 @@ from aws_lambda_powertools.utilities import parameters
 def get_credentials(scheme_type):
     """Retrieve credentials from SSM Parameter Store."""
     ttl = int(os.environ.get("PICORUN_CREDENTIALS_TTL", "300"))
-    param_name = f"/picorun/myapi/credentials-{scheme_type}"
+    param_name = f"/picofun/myapi/credentials-{scheme_type}"
     return parameters.get_parameter(param_name, transform="json", max_age=ttl)
 
 def preprocessor(request):
@@ -134,7 +134,7 @@ def preprocessor(request):
 **output/main.tf (excerpt):**
 ```hcl
 resource "aws_ssm_parameter" "credentials" {
-  name        = "/picorun/myapi/credentials-http"
+  name        = "/picofun/myapi/credentials-http"
   type        = "SecureString"
   key_id      = local.kms_key_arn
   value       = jsonencode({})
@@ -165,28 +165,28 @@ After Terraform creates the infrastructure, add your actual credentials:
 ```bash
 # Bearer Token
 aws ssm put-parameter \
-  --name "/picorun/myapi/credentials-http" \
+  --name "/picofun/myapi/credentials-http" \
   --type "SecureString" \
   --value '{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}' \
   --overwrite
 
 # Basic Auth
 aws ssm put-parameter \
-  --name "/picorun/myapi/credentials-http" \
+  --name "/picofun/myapi/credentials-http" \
   --type "SecureString" \
   --value '{"username":"admin","password":"secret123"}' \
   --overwrite
 
 # API Key
 aws ssm put-parameter \
-  --name "/picorun/myapi/credentials-api-key" \
+  --name "/picofun/myapi/credentials-api-key" \
   --type "SecureString" \
   --value '{"api_key":"abc123def456"}' \
   --overwrite
 
 # Mutual TLS
 aws ssm put-parameter \
-  --name "/picorun/myapi/credentials-mutual-tls" \
+  --name "/picofun/myapi/credentials-mutual-tls" \
   --type "SecureString" \
   --value '{"cert":"-----BEGIN CERTIFICATE-----\n...\n","key":"-----BEGIN PRIVATE KEY-----\n...\n"}' \
   --overwrite
@@ -262,7 +262,7 @@ Update the SSM parameter value:
 
 ```bash
 aws ssm put-parameter \
-  --name "/picorun/myapi/credentials-http" \
+  --name "/picofun/myapi/credentials-http" \
   --type "SecureString" \
   --value '{"token":"new-token-value"}' \
   --overwrite
@@ -327,7 +327,7 @@ preprocessor = "my_auth.oauth2_handler.preprocessor"
 **Checklist:**
 1. **Credentials populated?**
    ```bash
-   aws ssm get-parameter --name "/picorun/myapi/credentials-http" --with-decryption
+   aws ssm get-parameter --name "/picofun/myapi/credentials-http" --with-decryption
    ```
 
 2. **Correct JSON structure?**
@@ -471,7 +471,7 @@ uvx picofun myapi spec.yaml
 ```bash
 # Rename and restructure parameter
 aws ssm put-parameter \
-  --name "/picorun/myapi/credentials-http" \
+  --name "/picofun/myapi/credentials-http" \
   --type "SecureString" \
   --value "{\"token\":\"$(aws ssm get-parameter --name /myapp/api-token --with-decryption --query Parameter.Value --output text)\"}" \
   --overwrite

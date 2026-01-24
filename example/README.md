@@ -12,13 +12,13 @@ picofun --config-file example/picofun.toml zendesk https://developer.zendesk.com
 The output of the command should look something like this:
 
 ```
-INFO:picofun.lambda_generator:Generated function: /path/to/picofun/output/lambdas/get_api_lotus_assignables_autocomplete_json.py
-INFO:picofun.lambda_generator:Generated function: /path/to/picofun/output/lambdas/get_api_lotus_assignables_groups_json.py
+INFO:picofun.cli:Selected security scheme: basicAuth (http)
+INFO:picofun.layer:Prepared layer contents: /path/to/output/layer
+INFO:picofun.cli:Generated authentication hooks: /path/to/output/layer/auth_hooks.py
+INFO:picofun.lambda_generator:Generated function: /path/to/output/lambdas/post_api_v2_tickets.py
 [...]
-INFO:picofun.lambda_generator:Generated function: /path/to/picofun/output/lambdas/delete_api_v2_workspaces_destroy_many.py
-INFO:picofun.lambda_generator:Generated function: /path/to/picofun/output/lambdas/put_api_v2_workspaces_reorder.py
-INFO:picofun.layer:Prepared layer contents: /path/to/picofun/output/layer
-INFO:picofun.terraform_generator:Generated terraform: /path/to/picofun/output/main.tf
+INFO:picofun.lambda_generator:Generated function: /path/to/output/lambdas/get_api_v2_users_user_id.py
+INFO:picofun.terraform_generator:Generated terraform: /path/to/output/main.tf
 ```
 
 ## Deployment
@@ -47,7 +47,7 @@ I assume you have your AWS credentials properly configured. If not, [do that now
 
 **Finally** we're ready to deploy our Lambdas. To do this, run:
 
-```
+```sh
 terraform apply
 ```
 
@@ -90,7 +90,7 @@ This is a once off action.
 
 There is a full GitHub Actions deployment pipeline included in the project. It is designed to update the deployment once a week or when code is pushed to the main branch.
 
-To use the workflow you must create a repository level environment `AWS_ROLE_ARN` and set the value to the ARN of the role that will perform the deployments. Follow the [AWS documentation for setting up the role using OIDC](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/).
+To use the workflow you must create a repository level environment variable `AWS_ROLE_ARN` and set the value to the ARN of the role that will perform the deployments. Follow the [AWS documentation for setting up the role using OIDC](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/).
 
 The role must have access to manage IAM roles and policies, lambda functions, and CloudWatch log groups along with the ability to read and write to the Terraform backend resources.
 
@@ -108,5 +108,3 @@ terraform {
 ```
 
 For more information on the configuration, [refer to the Terraform S3 backend documentation](https://developer.hashicorp.com/terraform/language/backend/s3).
-
-When run for the first time, the pipeline will take a while. It is deploying over 450 Lambda functions and CloudWatch Log groups.

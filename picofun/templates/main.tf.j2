@@ -244,8 +244,8 @@ resource "aws_cloudwatch_log_group" "lambda" {
 }
 
 output "lambda_function_arns" {
-  description = "ARNs of the lambda functions"
-  value       = [for l in aws_lambda_function.this : l.arn]
+  description = "Map of ARNs for the generated lambda functions"
+  value       = { for k, v in aws_lambda_function.this : k => v.arn }
 }
 
 output "iam_role_arn" {

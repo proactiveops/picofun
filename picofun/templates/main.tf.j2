@@ -69,7 +69,7 @@ resource "aws_kms_alias" "this" {
 }
 
 resource "aws_ssm_parameter" "credentials" {
-  name        = "/picorun/{{ namespace }}/credentials-{{ auth_scheme_type }}"
+  name        = "/picofun/{{ namespace }}/credentials-{{ auth_scheme_type }}"
   description = "Credentials for {{ auth_scheme_name }} authentication"
   type        = "SecureString"
   key_id      = local.kms_key_arn
@@ -198,7 +198,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 data "aws_iam_policy_document" "lambda_auth" {
   statement {
     actions   = ["ssm:GetParameter"]
-    resources = ["arn:aws:ssm:*:*:parameter/picorun/{{ namespace }}/credentials-*"]
+    resources = ["arn:aws:ssm:*:*:parameter/picofun/{{ namespace }}/credentials-*"]
   }
 
   statement {

@@ -85,8 +85,8 @@ def test_generate_ssm_correct_path() -> None:
         with open(output_file) as f:
             content = f.read()
 
-        assert "/picorun/zendesk/credentials-api-key" in content
-        assert "parameter/picorun/zendesk/credentials-*" in content
+        assert "/picofun/zendesk/credentials-api-key" in content
+        assert "parameter/picofun/zendesk/credentials-*" in content
 
 
 def test_generate_ssm_secure_string() -> None:

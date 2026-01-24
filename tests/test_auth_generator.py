@@ -41,7 +41,7 @@ def test_generate_apikey_header() -> None:
 
     assert "def get_credentials(scheme_name: str) -> dict:" in code
     assert "def preprocessor(request):" in code
-    assert "/picorun/test-namespace/credentials-" in code
+    assert "/picofun/test-namespace/credentials-" in code
     assert 'request.headers["X-API-Key"]' in code
     assert 'creds["api_key"]' in code
 
@@ -211,7 +211,7 @@ def test_generated_code_namespace_substitution() -> None:
 
     code = generate_auth_hooks(scheme, "my-service", template_path)
 
-    assert "/picorun/my-service/credentials-" in code
+    assert "/picofun/my-service/credentials-" in code
 
 
 def test_generated_code_scheme_name_substitution() -> None:

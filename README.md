@@ -212,7 +212,7 @@ When you run PicoFun on an OpenAPI spec with security schemes:
 Credentials are stored in AWS Systems Manager Parameter Store with this pattern:
 
 ```
-/picorun/<namespace>/credentials-<scheme-type>
+/picofun/<namespace>/credentials-<scheme-type>
 ```
 
 Where `<scheme-type>` is:
@@ -221,8 +221,8 @@ Where `<scheme-type>` is:
 - `mutual-tls` for mutual TLS
 
 Examples:
-- `/picorun/myapi/credentials-http`
-- `/picorun/zendesk/credentials-api-key`
+- `/picofun/myapi/credentials-http`
+- `/picofun/zendesk/credentials-api-key`
 
 ### Credential Structure
 
@@ -265,7 +265,7 @@ After running `terraform apply`, you must populate the SSM parameter with your a
 ```bash
 # Using AWS CLI
 aws ssm put-parameter \
-  --name "/picorun/myapi/credentials-http" \
+  --name "/picofun/myapi/credentials-http" \
   --type "SecureString" \
   --value '{"token":"your-actual-token"}' \
   --overwrite

@@ -1,4 +1,3 @@
-bundle = "helpers"
 iam_role_prefix = "pf-zendesk-"
 include_endpoints = "include-endpoints.yaml"
 

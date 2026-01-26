@@ -1,5 +1,9 @@
 """Tests for authentication hook code generator."""
 
+__author__ = "Dave Hall <skwashd@gmail.com>"
+__copyright__ = "Copyright 2026, Dave Hall https://proactiveops.io"
+__license__ = "MIT"
+
 import ast
 
 from picofun.auth_generator import _to_kebab_case, generate_auth_hooks

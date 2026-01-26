@@ -1,5 +1,9 @@
 """Security scheme parsing and selection from OpenAPI specifications."""
 
+__author__ = "Dave Hall <skwashd@gmail.com>"
+__copyright__ = "Copyright 2026, Dave Hall https://proactiveops.io"
+__license__ = "MIT"
+
 from dataclasses import dataclass
 
 from picofun.errors import UnsupportedSecuritySchemeError

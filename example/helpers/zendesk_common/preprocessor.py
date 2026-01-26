@@ -1,5 +1,9 @@
 """Preprocessor for Zendesk API requests."""
 
+__author__ = "Dave Hall <skwashd@gmail.com>"
+__copyright__ = "Copyright 2024 - 2026, Dave Hall https://proactiveops.io"
+__license__ = "MIT"
+
 import base64
 
 import aws_lambda_powertools.utilities.parameters

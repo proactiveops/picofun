@@ -26,7 +26,7 @@ dynamic = ["version"]
 
 [dependency-groups]
 dev = [
-  "coverage==7.13.1",
+  "coverage==7.13.2",
   "pytest==9.0.2",
   "pytest-mock==3.15.1",
   "ruff==0.14.14",
@@ -39,7 +39,7 @@ build = [
 
 [build-system]
 requires = [
-  "setuptools==80.10.1",
+  "setuptools==80.10.2",
   "setuptools-git-versioning==3.0.1",
   "wheel==0.46.3",
 ]

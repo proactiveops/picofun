@@ -73,6 +73,8 @@ Some OpenAPI specs define server URLs with variables (e.g., `https://{subdomain}
 url = "https://production.api.example.com"
 ```
 
+or
+
 ```toml
 # Override specific variables in a tokenized URL
 # If spec has: https://{environment}.example.com/api/{version}
@@ -81,7 +83,6 @@ variables = { environment = "staging", version = "v2" }
 ```
 
 Server variables from the config override any defaults in the spec. Variables without defaults (in either spec or config) trigger a fatal error.
-```
 
 ## Usage
 

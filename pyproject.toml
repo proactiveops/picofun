@@ -39,23 +39,16 @@ build = [
 
 [build-system]
 requires = [
-  "setuptools==80.10.2",
-  "setuptools-git-versioning==3.0.1",
-  "wheel==0.46.3",
+  "hatchling==1.28.0",
+  "hatch-vcs==0.5.0"
 ]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.package-data]
-picfun = ["picofun/templates/*.j2"]
+build-backend = "hatchling.build"
 
 [project.scripts]
 picofun = "picofun:__main__.main"
 
-[tool.setuptools]
-packages = ["picofun"]
-
-[tool.setuptools-git-versioning]
-enabled = true
+[tool.hatch.version]
+source = "vcs"
 
 [tool.coverage.report]
 show_missing = true

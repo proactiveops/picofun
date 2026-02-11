@@ -25,9 +25,12 @@ jobs:
 
       - name: Ruff Format
         run: uv run ruff format --check .
-          
+
       - name: pytest
         run: uv run coverage run -m pytest
 
       - name: coverage
         run: uv run coverage report
+
+      - name: build
+        run: uv build

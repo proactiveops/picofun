@@ -14,7 +14,7 @@ dependencies = [
   "PyYAML==6.0.3",
   "requests==2.32.5",
   "tomlkit==0.14.0",
-  "typer==0.23.0",
+  "typer==0.24.0",
 ]
 
 license = "BSD-3-Clause"

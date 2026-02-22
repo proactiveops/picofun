@@ -624,3 +624,36 @@ def test_auth_ttl_validation_negative() -> None:
         picofun.config.Config(auth_ttl_minutes=-5)
 
     assert "auth_ttl_minutes" in str(exc_info.value)
+
+
+def test_config_iac_default() -> None:
+    """Test that iac defaults to terraform."""
+    config = picofun.config.Config()
+    assert config.iac == "terraform"
+
+
+def test_config_iac_cdk() -> None:
+    """Test that iac accepts cdk."""
+    config = picofun.config.Config(iac="cdk")
+    assert config.iac == "cdk"
+
+
+def test_config_iac_tf_normalized() -> None:
+    """Test that 'tf' normalizes to 'terraform'."""
+    config = picofun.config.Config(iac="tf")
+    assert config.iac == "terraform"
+
+
+def test_config_iac_invalid() -> None:
+    """Test that unsupported iac values are rejected."""
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        picofun.config.Config(iac="pulumi")
+    assert "InvalidIacToolError" in str(exc_info.value) or "Unsupported IaC tool" in str(exc_info.value)
+
+
+def test_config_merge_iac() -> None:
+    """Test that iac can be overridden via merge."""
+    config = picofun.config.Config()
+    assert config.iac == "terraform"
+    config.merge(iac="cdk")
+    assert config.iac == "cdk"

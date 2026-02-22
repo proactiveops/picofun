@@ -18,7 +18,7 @@ INFO:picofun.cli:Generated authentication hooks: /path/to/output/layer/auth_hook
 INFO:picofun.lambda_generator:Generated function: /path/to/output/lambdas/post_api_v2_tickets.py
 [...]
 INFO:picofun.lambda_generator:Generated function: /path/to/output/lambdas/get_api_v2_users_user_id.py
-INFO:picofun.terraform_generator:Generated terraform: /path/to/output/main.tf
+INFO:picofun.iac.terraform:Generated terraform: /path/to/output/main.tf
 ```
 
 ## Deployment

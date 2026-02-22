@@ -1,0 +1,13 @@
+[project]
+name = "picofun-cdk-example"
+version = "0.1.0"
+description = "PicoFun CDK example using the Petstore API"
+requires-python = ">=3.13"
+dependencies = [
+    "aws-cdk-lib==2.239.0",
+    "constructs==10.5.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

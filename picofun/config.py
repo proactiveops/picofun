@@ -49,6 +49,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
     auth_enabled: bool = True
     auth_ttl_minutes: int = 5
     bundle: str = None
+    iac: str = "terraform"
     iam_role_prefix: str = "pf-"
     include_endpoints: str = None
     layers: list[str] = [AWS_POWER_TOOLS_LAYER_ARN]
@@ -116,6 +117,33 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
         """
         if not isinstance(value, int) or value <= 0:
             raise ValueError("auth_ttl_minutes must be a positive integer")  # noqa TRY003 This is a valid use case for a ValueError.
+
+        return value
+
+    @field_validator("iac", mode="before")
+    @classmethod
+    def validate_iac(cls: "Config", value: str) -> str:
+        """
+        Normalize and validate the iac field.
+
+        Args:
+        ----
+            value: The value to validate.
+
+        Returns:
+        -------
+            str: The validated value.
+
+        Raises:
+        ------
+            InvalidIacToolError: If the value is not a supported IaC tool.
+
+        """
+        if value == "tf":
+            value = "terraform"
+
+        if value not in ("terraform", "cdk"):
+            raise picofun.errors.InvalidIacToolError(value)
 
         return value
 
@@ -276,7 +304,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
         else:
             template_path = os.path.realpath(value)
 
-        if not os.path.exists(os.path.join(template_path, "main.tf.j2")):
+        if not os.path.isdir(template_path):
             raise ValueError(f"Template path not found: {template_path}")  # noqa TRY003 This is a valid use case for a ValueError.
 
         return template_path

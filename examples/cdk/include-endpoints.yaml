@@ -1,0 +1,8 @@
+paths:
+  # Pet CRUD operations
+  - path: /pet
+    methods: [post, put]
+  - path: /pet/{petId}
+    methods: [get, delete]
+  - path: /pet/findByStatus
+    methods: [get]

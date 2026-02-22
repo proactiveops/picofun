@@ -291,7 +291,7 @@ By default, PicoFun creates a new KMS key for encrypting credentials. To use an 
 ```hcl
 module "example_lambdas" {
   source = "./output"
-  
+
   kms_key_arn = "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
 }
 ```
@@ -303,7 +303,7 @@ The generated Lambda functions include the `PICORUN_CREDENTIALS_TTL` environment
 ```hcl
 module "example_lambdas" {
   source = "./output"
-  
+
   auth_credentials_ttl = 600  # 10 minutes in seconds
 }
 ```
@@ -352,11 +352,11 @@ The preprocessing and postprocessing hooks allow engineers to customize the requ
 - Response data filtering or transformation
 - Custom headers or query parameters
 
-An example implementation of these hooks can be found in the [`example/zendesk_common`](example/zendesk_common) directory. The example pulls values from SSM Parameter store and uses them for the domain name and authorization header.
+An example implementation of these hooks can be found in the [`examples/zendesk/zendesk_common`](examples/zendesk/zendesk_common) directory. The example pulls values from SSM Parameter store and uses them for the domain name and authorization header.
 
 ## Template Overrides
 
-The default templates bundled with PicoFun are usually adequate for most use cases. There are times where more customisation is needed. This could be to include custom logic in the Lambda function or additional resources in the terraform module. 
+The default templates bundled with PicoFun are usually adequate for most use cases. There are times where more customisation is needed. This could be to include custom logic in the Lambda function or additional resources in the terraform module.
 
 If you need to override one PicoFun template, you need to copy both from the package. The templates are located in the `templates` directory in the PicoFun package.
 

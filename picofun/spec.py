@@ -19,7 +19,7 @@ class SpecLoader(abc.ABC):  # pragma: no cover
     """Loads an OpenAPI spec file."""
 
     @abc.abstractmethod
-    def load(self, location: str) -> str:
+    def load(self, location: str) -> bytes:
         """
         Load a spec file.
 
@@ -32,7 +32,7 @@ class SpecLoader(abc.ABC):  # pragma: no cover
 class FileSpecLoader(SpecLoader):
     """Loads an OpenAPI spec file from disk."""
 
-    def load(self, location: str) -> str:
+    def load(self, location: str) -> bytes:
         """
         Load a spec file from disk.
 
@@ -50,7 +50,7 @@ class FileSpecLoader(SpecLoader):
 class HTTPSpecLoader(SpecLoader):
     """Loads an OpenAPI spec file from a URL."""
 
-    def load(self, location: str) -> str:
+    def load(self, location: str) -> bytes:
         """
         Load a spec file from a URL.
 
@@ -73,7 +73,7 @@ class SpecParser(abc.ABC):  # pragma: no cover
     """Parses an OpenAPI spec file."""
 
     @abc.abstractmethod
-    def parse(self, content: str) -> dict:
+    def parse(self, content: str | bytes) -> dict:
         """
         Parse the contents of the spec file.
 
@@ -87,7 +87,7 @@ class SpecParser(abc.ABC):  # pragma: no cover
 class JSONSpecParser(SpecParser):
     """Parses an OpenAPI spec file in JSON format."""
 
-    def parse(self, content: str) -> dict:
+    def parse(self, content: str | bytes) -> dict:
         """
         Parse the contents of the spec file.
 
@@ -104,7 +104,7 @@ class JSONSpecParser(SpecParser):
 class YAMLSpecParser(SpecParser):
     """Parses an OpenAPI spec file in YAML format."""
 
-    def patch_loader(self, loader: yaml.SafeLoader) -> yaml.SafeLoader:
+    def patch_loader(self, loader: type[yaml.SafeLoader]) -> type[yaml.SafeLoader]:
         """
         Patch the loader to allow = as a value.
 
@@ -118,7 +118,7 @@ class YAMLSpecParser(SpecParser):
             loader.yaml_implicit_resolvers.pop("=")
         return loader
 
-    def parse(self, content: str) -> dict:
+    def parse(self, content: str | bytes) -> dict:
         """
         Parse the contents of the spec file.
 
@@ -148,7 +148,7 @@ class Spec:
         """
         self._content = self._load(location)
 
-    def _load(self, location: str) -> str:
+    def _load(self, location: str) -> bytes:
         """
         Load a spec file.
 

@@ -81,6 +81,10 @@ exclude = '''
 )
 '''
 
+[tool.ty.src]
+# Examples are ignored so we don't need to install their dependencies.
+exclude = ["examples/", "output/"]
+
 [tool.ruff.lint]
 # Rules listed at https://docs.astral.sh/ruff/rules/
 select = ["B", "D", "E", "F", "G", "I", "N", "S", "W", "ANN" ,"BLE", "C4", "C90", "DTZ", "ERA", "PLW", "PT", "RET", "RUF", "SIM", "TRY", "UP"]

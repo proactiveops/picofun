@@ -5,7 +5,6 @@ __copyright__ = "Copyright 2023 - 2026, Dave Hall https://proactiveops.io"
 __license__ = "MIT"
 
 import os
-import typing
 
 import jinja2
 
@@ -13,7 +12,7 @@ import jinja2
 class Template:
     """Manages Jinja2 templates."""
 
-    def __init__(self, base_path: str | None = "") -> None:
+    def __init__(self, base_path: str = "") -> None:
         """Initialise TemplateLoader."""
         if not os.path.isabs(base_path):
             base_path = os.path.join(os.getcwd(), base_path)
@@ -34,6 +33,6 @@ class Template:
 
         return self.templates[filename]
 
-    def render(self, filename: str, **kwargs: dict[str : typing.Any]) -> str:
+    def render(self, filename: str, **kwargs: object) -> str:
         """Render a template by filename."""
         return self.get(filename).render(**kwargs)

@@ -109,7 +109,7 @@ class InvalidConfigTypeError(TypeError):
     def __init__(
         self,
         name: str,
-        value: typing.Any,  # noqa ANN001 We need dynamic types as this generic exception.
+        value: typing.Any,  # noqa ANN401 We need dynamic types as this generic exception.
         expected: typing.Any,  # noqa ANN401 We need dynamic types as this generic exception.
     ) -> None:
         """Initialise InvalidConfigTypeError."""

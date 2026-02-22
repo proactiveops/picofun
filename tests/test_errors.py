@@ -81,5 +81,7 @@ def test_unknown_config_value_error() -> None:
 
 def test_invalid_iac_tool_error() -> None:
     """Test InvalidIacToolError."""
-    with pytest.raises(picofun.errors.InvalidIacToolError, match="Unsupported IaC tool: pulumi"):
+    with pytest.raises(
+        picofun.errors.InvalidIacToolError, match="Unsupported IaC tool: pulumi"
+    ):
         raise picofun.errors.InvalidIacToolError("pulumi")

@@ -11,7 +11,7 @@ import picofun.errors
 import picofun.spec
 
 
-def mock_requests_get_spec(*args: list, **kwargs: dict) -> "MockResponse":  # noqa: F821
+def mock_requests_get_spec(*args: object, **kwargs: object) -> object:
     """
     Mock requests.get() responses.
 

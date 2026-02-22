@@ -141,7 +141,7 @@ class LambdaGenerator:
 
     def generate(
         self,
-        api_data: dict[str : typing.Any],
+        api_data: dict[str, typing.Any],
     ) -> list[str]:
         """Generate the lambda functions."""
         output_dir = self._config_dict["output_dir"]
@@ -186,7 +186,7 @@ class LambdaGenerator:
         return lambdas
 
     def render(
-        self, base_url: str, method: str, path: str, details: dict[str : typing.Any]
+        self, base_url: str, method: str, path: str, details: dict[str, typing.Any]
     ) -> str:
         """Render the lambda function."""
         preprocessor_handler = self._config_dict["preprocessor"]

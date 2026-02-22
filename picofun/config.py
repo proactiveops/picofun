@@ -9,9 +9,9 @@ import typing
 from importlib.resources import files
 
 import tomlkit
+import tomlkit.exceptions
 from pydantic import (
     BaseModel,
-    DirectoryPath,
     ValidationError,
     field_validator,
     model_validator,
@@ -48,20 +48,20 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     auth_enabled: bool = True
     auth_ttl_minutes: int = 5
-    bundle: str = None
+    bundle: str | None = None
     iac: str = "terraform"
     iam_role_prefix: str = "pf-"
-    include_endpoints: str = None
+    include_endpoints: str | None = None
     layers: list[str] = [AWS_POWER_TOOLS_LAYER_ARN]
-    output_dir: DirectoryPath = os.path.realpath(os.path.join(os.getcwd(), "output"))
+    output_dir: str = os.path.realpath(os.path.join(os.getcwd(), "output"))
     postprocessor: str = ""
     preprocessor: str = ""
-    role_permissions_boundary: str = None
+    role_permissions_boundary: str | None = None
     server: ServerConfig | None = None
     subnets: list[str] = []
     tags: dict[str, typing.Any] = {}
-    template_path: DirectoryPath = os.path.join(files("picofun"), "templates")
-    vpc_id: str = None
+    template_path: str = os.path.join(str(files("picofun")), "templates")
+    vpc_id: str | None = None
     xray_tracing: bool = True
 
     @model_validator(mode="after")
@@ -98,7 +98,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("auth_ttl_minutes", mode="before")
     @classmethod
-    def validate_auth_ttl(cls: "Config", value: int) -> int:
+    def validate_auth_ttl(cls: type["Config"], value: int) -> int:
         """
         Check if auth_ttl_minutes is a positive integer.
 
@@ -122,7 +122,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("iac", mode="before")
     @classmethod
-    def validate_iac(cls: "Config", value: str) -> str:
+    def validate_iac(cls: type["Config"], value: str) -> str:
         """
         Normalize and validate the iac field.
 
@@ -149,7 +149,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("bundle", mode="before")
     @classmethod
-    def validate_bundle(cls: "Config", value: str) -> str:
+    def validate_bundle(cls: type["Config"], value: str) -> str:
         """
         Check if bundle is a valid path.
 
@@ -174,7 +174,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("include_endpoints", mode="before")
     @classmethod
-    def validate_include_endpoints(cls: "Config", value: str) -> str:
+    def validate_include_endpoints(cls: type["Config"], value: str) -> str:
         """
         Check if include_endpoints is a valid path.
 
@@ -199,7 +199,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("layers", mode="before")
     @classmethod
-    def validate_layers(cls: "Config", value: str | list[str]) -> list[str]:
+    def validate_layers(cls: type["Config"], value: str | list[str]) -> list[str]:
         """
         Check if layers is a list of strings.
 
@@ -232,7 +232,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("output_dir", mode="before")
     @classmethod
-    def validate_output_dir(cls: "Config", value: str) -> str:
+    def validate_output_dir(cls: type["Config"], value: str) -> str:
         """
         Check if output_dir is a valid path.
 
@@ -257,7 +257,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("subnets", mode="before")
     @classmethod
-    def validate_subnets(cls: "Config", value: str | list[str]) -> list[str]:
+    def validate_subnets(cls: type["Config"], value: str | list[str]) -> list[str]:
         """
         Check if subnets is a list of strings.
 
@@ -286,7 +286,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
     @field_validator("template_path", mode="before")
     @classmethod
-    def validate_template_path(cls: "Config", value: str) -> str:
+    def validate_template_path(cls: type["Config"], value: str) -> str:
         """
         Check if template is a valid path.
 
@@ -309,7 +309,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
 
         return template_path
 
-    def merge(self, **kwargs: dict[str, typing.Any]) -> None:
+    def merge(self, **kwargs: object) -> None:
         """
         Merge the existing configuration with a dictionary of values.
 
@@ -321,7 +321,7 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
         # Handle server_url CLI override - it takes precedence and ignores config file
         server_url = kwargs.get("server_url")
         if server_url:
-            self.server = ServerConfig(url=server_url)
+            self.server = ServerConfig(url=str(server_url))
             # Don't process server_url further
             kwargs = {k: v for k, v in kwargs.items() if k != "server_url"}
 
@@ -377,7 +377,7 @@ class ConfigLoader:
         """
         return self._config
 
-    def load_from_file(self, path: str) -> None:
+    def load_from_file(self, path: str) -> Config:
         """
         Load configuration from toml file.
 
@@ -398,24 +398,26 @@ class ConfigLoader:
             except tomlkit.exceptions.ParseError as e:
                 raise picofun.errors.InvalidConfigError() from e
 
+        config_data: dict[str, typing.Any] = dict(contents)
+
         # Resolve include_endpoints path relative to config file location
-        if contents.get("include_endpoints"):
-            include_endpoints = contents["include_endpoints"]
+        if config_data.get("include_endpoints"):
+            include_endpoints = str(config_data["include_endpoints"])
             if not os.path.isabs(include_endpoints):
                 config_dir = os.path.dirname(path)
-                contents["include_endpoints"] = os.path.join(
+                config_data["include_endpoints"] = os.path.join(
                     config_dir, include_endpoints
                 )
 
         # Flatten [auth] section if present
-        if "auth" in contents:
-            auth_section = contents.pop("auth")
+        if "auth" in config_data:
+            auth_section = config_data.pop("auth")
             if "enabled" in auth_section:
-                contents["auth_enabled"] = auth_section["enabled"]
+                config_data["auth_enabled"] = auth_section["enabled"]
             if "ttl_minutes" in auth_section:
-                contents["auth_ttl_minutes"] = auth_section["ttl_minutes"]
+                config_data["auth_ttl_minutes"] = auth_section["ttl_minutes"]
 
         try:
-            return Config(**contents)
+            return Config(**config_data)
         except ValidationError as e:
             raise picofun.errors.UnknownConfigValueError() from e

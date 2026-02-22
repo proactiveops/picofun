@@ -1,4 +1,4 @@
-"""Integration tests for full generation with authentication."""
+"""Integration tests for full Terraform generation with authentication."""
 
 __author__ = "Dave Hall <skwashd@gmail.com>"
 __copyright__ = "Copyright 2026, Dave Hall https://proactiveops.io"
@@ -191,6 +191,29 @@ paths:
         )
 
         assert result.exit_code == 1
+
+
+def test_generate_tf_shorthand_flag() -> None:
+    """Test that --tf shorthand flag produces Terraform output."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result = runner.invoke(
+            app,
+            [
+                "testtf",
+                "tests/fixtures/spec_bearer_auth.yaml",
+                "--tf",
+                "--output-dir",
+                tmpdir,
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        main_tf_path = os.path.join(tmpdir, "main.tf")
+        assert os.path.exists(main_tf_path)
+
+        construct_path = os.path.join(tmpdir, "construct.py")
+        assert not os.path.exists(construct_path)
 
 
 def test_regeneration_overwrites() -> None:

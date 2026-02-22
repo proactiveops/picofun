@@ -14,12 +14,13 @@ import picofun.auth_generator
 import picofun.config
 import picofun.endpoint_filter
 import picofun.errors
+import picofun.iac.cdk
+import picofun.iac.terraform
 import picofun.lambda_generator
 import picofun.layer
 import picofun.security
 import picofun.spec
 import picofun.template
-import picofun.terraform_generator
 
 app = typer.Typer()
 logger = logging.getLogger(__name__)
@@ -56,14 +57,35 @@ def main(
             help="Override server URL from OpenAPI spec. Ignores any server config in picofun.toml."
         ),
     ] = None,
+    iac: typing.Annotated[
+        str | None,
+        typer.Option(
+            help="IaC tool to use for infrastructure generation (terraform, tf, cdk)"
+        ),
+    ] = None,
+    cdk: typing.Annotated[
+        bool,
+        typer.Option("--cdk", help="Shorthand for --iac cdk"),
+    ] = False,
+    tf: typing.Annotated[
+        bool,
+        typer.Option("--tf", help="Shorthand for --iac terraform"),
+    ] = False,
 ) -> None:
-    """Generate lambda functions and terraform configuration to call REST APIs."""
+    """Generate lambda functions and IaC configuration to call REST APIs."""
+    # Resolve IaC selection: shorthand flags take precedence over --iac
+    if cdk:
+        iac = "cdk"
+    elif tf:
+        iac = "terraform"
+
     config = picofun.config.ConfigLoader(config_file).get_config()
     config.merge(
         output_dir=output_dir,
         layers=layers,
         bundle=bundle,
         server_url=server_url,
+        iac=iac,
     )
 
     spec = picofun.spec.Spec(spec_file)
@@ -129,10 +151,14 @@ def main(
     )
     lambdas = lambda_generator.generate(api_data)
 
-    terraform_generator = picofun.terraform_generator.TerraformGenerator(
-        template, namespace, config
-    )
-    terraform_generator.generate(
+    if config.iac == "cdk":
+        iac_generator = picofun.iac.cdk.CdkGenerator(template, namespace, config)
+    else:
+        iac_generator = picofun.iac.terraform.TerraformGenerator(
+            template, namespace, config
+        )
+
+    iac_generator.generate(
         lambdas,
         auth_enabled=config.auth_enabled and selected_scheme is not None,
         auth_scheme_type=auth_scheme_type,

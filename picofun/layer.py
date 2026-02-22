@@ -8,6 +8,7 @@ import logging
 import os
 import shutil
 
+import picofun.config
 import picofun.pyproject_manager
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ PICORUN_VERSION = "0.2.1"
 class Layer:
     """Manage the contents of a Lambda layer."""
 
-    def __init__(self, config: dict) -> None:
+    def __init__(self, config: picofun.config.Config) -> None:
         """Initialise the layer."""
         self._config = config
 

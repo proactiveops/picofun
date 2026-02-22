@@ -7,6 +7,7 @@ __license__ = "MIT"
 import os
 import re
 import textwrap
+import typing
 
 import tomlkit
 
@@ -71,12 +72,13 @@ class PyProjectManager:
         # Subset of https://pip.pypa.io/en/stable/reference/requirement-specifiers/#requirement-specifiers
         regex = re.compile(rf"{package}\s?([~<>=]?=?|$)")
 
-        dependencies = self._toml["project"]["dependencies"]
+        project = typing.cast(dict[str, typing.Any], self._toml["project"])
+        dependencies = typing.cast(list[str], project["dependencies"])
 
-        matches = list(filter(regex.match, dependencies))
+        matches = [dep for dep in dependencies if regex.match(dep)]
 
         if len(matches) == 0:
             dependencies.append(f"{package}=={version}")
             dependencies.sort()
 
-        self._toml["project"]["dependencies"] = dependencies
+        project["dependencies"] = dependencies

@@ -8,8 +8,8 @@ import os
 import tempfile
 
 import picofun.config
+import picofun.iac.terraform
 import picofun.template
-import picofun.terraform_generator
 
 
 def test_generate() -> None:
@@ -18,7 +18,7 @@ def test_generate() -> None:
     tpl = picofun.template.Template("tests/data/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
-        generator = picofun.terraform_generator.TerraformGenerator(tpl, "test", config)
+        generator = picofun.iac.terraform.TerraformGenerator(tpl, "test", config)
         generator.generate([])
 
 
@@ -28,9 +28,7 @@ def test_generate_iam_statements_included() -> None:
     tpl = picofun.template.Template("picofun/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
-        generator = picofun.terraform_generator.TerraformGenerator(
-            tpl, "testauth", config
-        )
+        generator = picofun.iac.terraform.TerraformGenerator(tpl, "testauth", config)
         generator.generate(
             ["test_lambda"],
             auth_enabled=True,
@@ -55,9 +53,7 @@ def test_generate_iam_statements_excluded() -> None:
     tpl = picofun.template.Template("picofun/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
-        generator = picofun.terraform_generator.TerraformGenerator(
-            tpl, "testnoauth", config
-        )
+        generator = picofun.iac.terraform.TerraformGenerator(tpl, "testnoauth", config)
         generator.generate(["test_lambda"], auth_enabled=False)
 
         output_file = os.path.join(out_dir, "main.tf")
@@ -75,9 +71,7 @@ def test_generate_ssm_correct_path() -> None:
     tpl = picofun.template.Template("picofun/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
-        generator = picofun.terraform_generator.TerraformGenerator(
-            tpl, "zendesk", config
-        )
+        generator = picofun.iac.terraform.TerraformGenerator(tpl, "zendesk", config)
         generator.generate(
             ["test_lambda"],
             auth_enabled=True,
@@ -99,9 +93,7 @@ def test_generate_ssm_secure_string() -> None:
     tpl = picofun.template.Template("picofun/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
-        generator = picofun.terraform_generator.TerraformGenerator(
-            tpl, "testauth", config
-        )
+        generator = picofun.iac.terraform.TerraformGenerator(tpl, "testauth", config)
         generator.generate(
             ["test_lambda"],
             auth_enabled=True,
@@ -123,9 +115,7 @@ def test_generate_kms_conditional() -> None:
     tpl = picofun.template.Template("picofun/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
-        generator = picofun.terraform_generator.TerraformGenerator(
-            tpl, "testauth", config
-        )
+        generator = picofun.iac.terraform.TerraformGenerator(tpl, "testauth", config)
         generator.generate(
             ["test_lambda"],
             auth_enabled=True,
@@ -150,9 +140,7 @@ def test_generate_variables_kms_optional() -> None:
     tpl = picofun.template.Template("picofun/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
-        generator = picofun.terraform_generator.TerraformGenerator(
-            tpl, "testauth", config
-        )
+        generator = picofun.iac.terraform.TerraformGenerator(tpl, "testauth", config)
         generator.generate(
             ["test_lambda"],
             auth_enabled=True,
@@ -174,9 +162,7 @@ def test_generate_lambda_env_ttl() -> None:
     tpl = picofun.template.Template("picofun/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
-        generator = picofun.terraform_generator.TerraformGenerator(
-            tpl, "testauth", config
-        )
+        generator = picofun.iac.terraform.TerraformGenerator(tpl, "testauth", config)
         generator.generate(
             ["test_lambda"],
             auth_enabled=True,
@@ -200,9 +186,7 @@ def test_generate_auth_credentials_ttl_variable() -> None:
     tpl = picofun.template.Template("picofun/templates")
     with tempfile.TemporaryDirectory() as out_dir:
         config.output_dir = out_dir
-        generator = picofun.terraform_generator.TerraformGenerator(
-            tpl, "testauth", config
-        )
+        generator = picofun.iac.terraform.TerraformGenerator(tpl, "testauth", config)
         generator.generate(
             ["test_lambda"],
             auth_enabled=True,

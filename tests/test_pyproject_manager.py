@@ -6,6 +6,7 @@ __license__ = "MIT"
 
 import os
 import tempfile
+import typing
 
 import picofun.pyproject_manager
 
@@ -14,7 +15,9 @@ def test_load() -> None:
     """Test loading the requirements file."""
     pyproject = picofun.pyproject_manager.PyProjectManager("tests/data/pyproject.toml")
 
-    assert pyproject._toml["project"]["dependencies"] == ["picorun==0.1.0"]
+    assert typing.cast(dict[str, typing.Any], pyproject._toml["project"])[
+        "dependencies"
+    ] == ["picorun==0.1.0"]
 
 
 def test_load_no_file() -> None:
@@ -23,7 +26,10 @@ def test_load_no_file() -> None:
         "tests/data/pyproject-not-found.toml"
     )
 
-    assert pyproject._toml["project"]["dependencies"] == []
+    assert (
+        typing.cast(dict[str, typing.Any], pyproject._toml["project"])["dependencies"]
+        == []
+    )
 
 
 def test_update() -> None:
@@ -31,7 +37,9 @@ def test_update() -> None:
     pyproject = picofun.pyproject_manager.PyProjectManager("tests/data/pyproject.toml")
     pyproject.update("picorun", "1.0.0")
 
-    assert pyproject._toml["project"]["dependencies"] == ["picorun==0.1.0"]
+    assert typing.cast(dict[str, typing.Any], pyproject._toml["project"])[
+        "dependencies"
+    ] == ["picorun==0.1.0"]
 
 
 def test_update_add() -> None:
@@ -41,7 +49,9 @@ def test_update_add() -> None:
     )
     pyproject.update("picorun", "1.0.0")
 
-    assert pyproject._toml["project"]["dependencies"] == ["picorun==1.0.0"]
+    assert typing.cast(dict[str, typing.Any], pyproject._toml["project"])[
+        "dependencies"
+    ] == ["picorun==1.0.0"]
 
 
 def test_save() -> None:

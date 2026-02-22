@@ -7,7 +7,7 @@ This example PicoFun project demonstrates generating Lambdas for the [Zendesk Ti
 To generate the Lambda functions and associated Terraform, you can run the following commmand:
 
 ```sh
-picofun --config-file example/picofun.toml zendesk https://developer.zendesk.com/zendesk/oas.yaml
+picofun --config-file examples/zendesk/picofun.toml zendesk https://developer.zendesk.com/zendesk/oas.yaml
 ```
 The output of the command should look something like this:
 
@@ -18,7 +18,7 @@ INFO:picofun.cli:Generated authentication hooks: /path/to/output/layer/auth_hook
 INFO:picofun.lambda_generator:Generated function: /path/to/output/lambdas/post_api_v2_tickets.py
 [...]
 INFO:picofun.lambda_generator:Generated function: /path/to/output/lambdas/get_api_v2_users_user_id.py
-INFO:picofun.terraform_generator:Generated terraform: /path/to/output/main.tf
+INFO:picofun.iac.terraform:Generated terraform: /path/to/output/main.tf
 ```
 
 ## Deployment
@@ -26,7 +26,7 @@ INFO:picofun.terraform_generator:Generated terraform: /path/to/output/main.tf
 Before we deploy all of our Lambda functions we need to copy `extra.tf` to `output/` so we have the additional policy attached to the Lambdas execution role. This allows it to read the SSM params we created earlier. To do this, run:
 
 ```sh
-cp example/extra.tf output
+cp examples/zendesk/extra.tf output
 ```
 
 To run the deployment we need to change into the output directory by running:
@@ -69,7 +69,7 @@ The project depends on credentials being available in [SSM Parameter Store](http
 
 ### `/picorun/zendesk/credentials-http`
 
-These are the credentials used to access your Zendesk instance. *These are sensitive values, so you must encrypt them.** Set the type to `SecureString`. 
+These are the credentials used to access your Zendesk instance. *These are sensitive values, so you must encrypt them.** Set the type to `SecureString`.
 
 The IAM policy assumes that you're using the AWS managed key `alias/aws/ssm`. You can use a Customer Managed Key for encrypting the creds, but if you do so you will need to adjust override the template to adjust the policy.
 

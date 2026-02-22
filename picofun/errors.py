@@ -81,6 +81,20 @@ class EndpointFilterInvalidYAMLError(Exception):
         super().__init__(f"Invalid YAML in endpoint filter file: {error}")
 
 
+class InvalidIacToolError(ValueError):
+    """Exception thrown when an unsupported IaC tool is specified."""
+
+    def __init__(self, value: str) -> None:
+        """
+        Initialise InvalidIacToolError.
+
+        :param value: The unsupported IaC tool value.
+        """
+        super().__init__(
+            f"Unsupported IaC tool: {value}. Must be 'terraform' or 'cdk'."
+        )
+
+
 class InvalidConfigError(Exception):
     """Exception thrown when the config file is not valid TOML."""
 
@@ -95,7 +109,7 @@ class InvalidConfigTypeError(TypeError):
     def __init__(
         self,
         name: str,
-        value: typing.Any,  # noqa ANN001 We need dynamic types as this generic exception.
+        value: typing.Any,  # noqa ANN401 We need dynamic types as this generic exception.
         expected: typing.Any,  # noqa ANN401 We need dynamic types as this generic exception.
     ) -> None:
         """Initialise InvalidConfigTypeError."""

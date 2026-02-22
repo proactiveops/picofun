@@ -2,7 +2,7 @@
 
 *There's little fun in writing boilerplate*
 
-PicoFun is a tool for generating Python based clients for OpenAPI spec files. The client for each endpoint is packaged as an AWS Lambda function. A terraform module is also generated to deploy the clients to AWS. The generated functions are designed to be be invoked using Step Functions or the Lambda Invoke API.
+PicoFun is a tool for generating Python based clients for OpenAPI spec files. The client for each endpoint is packaged as an AWS Lambda function. Infrastructure as Code (Terraform or AWS CDK) is also generated to deploy the clients to AWS. The generated functions are designed to be be invoked using Step Functions or the Lambda Invoke API.
 
 **PicoFun only supports OpenAPI version 3 spec files.** Swagger files and versions of OpenAPI prior to 3 are not supported.
 
@@ -24,6 +24,7 @@ The configuration file has the following structure:
 
 ```toml
 bundle="/path/containing/code/to/bundle/into/build" # default is none
+iac="terraform" # default is "terraform". Set to "cdk" for AWS CDK output
 iam_role_prefix="my-prefix-" # default is "pf-" for PicoFun
 include_endpoints="include-endpoints.yaml" # default is none, generates all endpoints if omitted
 layers=[ # default is none, but if AWS Powertools isn't present it is added
@@ -106,6 +107,9 @@ While the `config.toml` file is the preferred way to manage the configuration fo
   --layers       # Comma separated list of Lambda layer ARNs to include in the function configuration
   --bundle       # Path to code to bundle into a layer. If requirements.txt present pip install will be run.
   --server-url   # Override server URL in the spec. Ignores any [server] config in picofun.toml
+  --iac          # IaC tool: "terraform" (default), "tf", or "cdk"
+  --cdk          # Shorthand for --iac cdk
+  --tf           # Shorthand for --iac terraform
 ```
 
 Here is an example of overriding the configuration file:
@@ -291,7 +295,7 @@ By default, PicoFun creates a new KMS key for encrypting credentials. To use an 
 ```hcl
 module "example_lambdas" {
   source = "./output"
-  
+
   kms_key_arn = "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
 }
 ```
@@ -303,7 +307,7 @@ The generated Lambda functions include the `PICORUN_CREDENTIALS_TTL` environment
 ```hcl
 module "example_lambdas" {
   source = "./output"
-  
+
   auth_credentials_ttl = 600  # 10 minutes in seconds
 }
 ```
@@ -352,17 +356,23 @@ The preprocessing and postprocessing hooks allow engineers to customize the requ
 - Response data filtering or transformation
 - Custom headers or query parameters
 
-An example implementation of these hooks can be found in the [`example/zendesk_common`](example/zendesk_common) directory. The example pulls values from SSM Parameter store and uses them for the domain name and authorization header.
+An example implementation of these hooks can be found in the [`examples/zendesk/zendesk_common`](examples/zendesk/zendesk_common) directory. The example pulls values from SSM Parameter store and uses them for the domain name and authorization header.
 
 ## Template Overrides
 
-The default templates bundled with PicoFun are usually adequate for most use cases. There are times where more customisation is needed. This could be to include custom logic in the Lambda function or additional resources in the terraform module. 
+The default templates bundled with PicoFun are usually adequate for most use cases. There are times where more customisation is needed. This could be to include custom logic in the Lambda function or additional resources in the terraform module.
 
 If you need to override one PicoFun template, you need to copy both from the package. The templates are located in the `templates` directory in the PicoFun package.
 
 You can add the path to the templates to the `config.toml` file using the `template_path` entry.
 
-## Terraform
+## Infrastructure as Code
+
+PicoFun supports two IaC backends: **Terraform** (default) and **AWS CDK** (Python).
+
+Select the backend via config file (`iac = "cdk"`) or CLI flags (`--iac cdk`, `--cdk`, `--tf`). Shorthand flags take precedence over `--iac` if both are provided.
+
+### Terraform
 
 PicoFun generates a terraform module to deploy the generated functions to AWS. The module is located in the root of your configured output directory. It `output`s the Lambda function ARNs and IAM role ARN.
 
@@ -373,3 +383,27 @@ module "example_lambdas" {
   source = "/path/to/picofun/output"
 }
 ```
+
+### AWS CDK
+
+When `iac = "cdk"` is set (or `--cdk` is passed), PicoFun generates an L3 Construct class in `output/construct.py`. The construct creates all the same AWS resources as the Terraform output (Lambda functions, IAM roles, CloudWatch log groups, and conditional KMS/SSM/VPC resources).
+
+The construct exposes:
+- `functions` — a `dict[str, lambda_.Function]` for wiring into Step Functions or other constructs
+- `role` — the shared `iam.Role` used by all Lambda functions
+
+Usage in a CDK app:
+
+```python
+from output.construct import MyapiFunctions
+
+my_api = MyapiFunctions(self, "MyApiFunctions")
+
+# Wire into Step Functions
+task = sfn_tasks.LambdaInvoke(
+    self, "GetUsers",
+    lambda_function=my_api.functions["get_users"],
+)
+```
+
+See `examples/cdk/` for a complete walkthrough.

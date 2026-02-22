@@ -13,12 +13,14 @@ import pydantic
 import pytest
 
 import picofun.config
+import picofun.errors
 
 
 def test_config_getattr() -> None:
     """Test loading a configuration file."""
-    params = {"layers": ["arn:aws:lambda:us-east-1:012345678910:layer:example:1"]}
-    config = picofun.config.Config(**params)
+    config = picofun.config.Config(
+        layers=["arn:aws:lambda:us-east-1:012345678910:layer:example:1"]
+    )
 
     assert config.layers == [
         picofun.config.AWS_POWER_TOOLS_LAYER_ARN,
@@ -29,18 +31,20 @@ def test_config_getattr() -> None:
 def test_config_getattr_invalid() -> None:
     """Test __getattr__ with an invalid property."""
     config = picofun.config.Config()
+    attr = "invalid"
     with pytest.raises(
         AttributeError, match="'Config' object has no attribute 'invalid'"
     ):
-        _ = config.invalid
+        _ = getattr(config, attr)
 
 
 def test_config_setattr_invalid() -> None:
     """Test setting invalid attribute."""
     config = picofun.config.Config()
+    attr = "invalid"
 
     with pytest.raises(pydantic.ValidationError):
-        config.invalid = "invalid"
+        setattr(config, attr, attr)
 
 
 def test_config_setattr_layers_powertools() -> None:
@@ -230,11 +234,10 @@ def test_config_validate_template_path_not_found() -> None:
     ],
 )
 def test_config_validate_subnets_vpc(
-    vpc_id: str, subnets: list, expected: dict[str : str | list]
+    vpc_id: str, subnets: list, expected: dict[str, str | list[str]]
 ) -> None:
     """Test subnets VPC validation."""
-    params = {"vpc_id": vpc_id, "subnets": subnets}
-    config = picofun.config.Config(**params)
+    config = picofun.config.Config(vpc_id=vpc_id, subnets=subnets)
 
     assert config.vpc_id == expected["vpc_id"]
     assert config.subnets == expected["subnets"]
@@ -251,11 +254,10 @@ def test_config_validate_subnets_vpc(
 )
 def test_config_validate_subnets_vpc_invalid(vpc_id: str, subnets: list) -> None:
     """Test subnets VPC validation with invalid configuration."""
-    params = {"vpc_id": vpc_id, "subnets": subnets}
     with pytest.raises(
         ValueError, match="Both subnets and vpc must be set, if one is set"
     ):
-        picofun.config.Config(**params)
+        picofun.config.Config(vpc_id=vpc_id, subnets=subnets)
 
 
 def test_config_merge() -> None:
@@ -331,7 +333,7 @@ def test_configloader_empty_file() -> None:
         ("/this/file/doesnt/exist.toml", picofun.errors.ConfigFileNotFoundError),
     ],
 )
-def test_configloader_errors(config_file: str, exception_type: Exception) -> None:
+def test_configloader_errors(config_file: str, exception_type: type[Exception]) -> None:
     """Test loading a missing configuration file."""
     with pytest.raises(exception_type):
         picofun.config.ConfigLoader(os.path.realpath(config_file))
@@ -409,6 +411,7 @@ def test_configloader_include_endpoints_relative() -> None:
 
         # The relative path should be resolved relative to the config file
         # Use os.path.realpath to normalize both paths (handles /var vs /private/var on macOS)
+        assert config.include_endpoints is not None
         assert os.path.realpath(config.include_endpoints) == os.path.realpath(
             filter_path
         )
@@ -453,6 +456,7 @@ def test_config_with_server_url() -> None:
     config = picofun.config.Config(
         server=picofun.config.ServerConfig(url="https://override.example.com")
     )
+    assert config.server is not None
     assert config.server.url == "https://override.example.com"
     assert config.server.variables is None
 
@@ -464,6 +468,7 @@ def test_config_with_server_variables() -> None:
             variables={"subdomain": "custom", "domain": "test"}
         )
     )
+    assert config.server is not None
     assert config.server.url is None
     assert config.server.variables == {"subdomain": "custom", "domain": "test"}
 
@@ -624,3 +629,38 @@ def test_auth_ttl_validation_negative() -> None:
         picofun.config.Config(auth_ttl_minutes=-5)
 
     assert "auth_ttl_minutes" in str(exc_info.value)
+
+
+def test_config_iac_default() -> None:
+    """Test that iac defaults to terraform."""
+    config = picofun.config.Config()
+    assert config.iac == "terraform"
+
+
+def test_config_iac_cdk() -> None:
+    """Test that iac accepts cdk."""
+    config = picofun.config.Config(iac="cdk")
+    assert config.iac == "cdk"
+
+
+def test_config_iac_tf_normalized() -> None:
+    """Test that 'tf' normalizes to 'terraform'."""
+    config = picofun.config.Config(iac="tf")
+    assert config.iac == "terraform"
+
+
+def test_config_iac_invalid() -> None:
+    """Test that unsupported iac values are rejected."""
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        picofun.config.Config(iac="pulumi")
+    assert "InvalidIacToolError" in str(
+        exc_info.value
+    ) or "Unsupported IaC tool" in str(exc_info.value)
+
+
+def test_config_merge_iac() -> None:
+    """Test that iac can be overridden via merge."""
+    config = picofun.config.Config()
+    assert config.iac == "terraform"
+    config.merge(iac="cdk")
+    assert config.iac == "cdk"

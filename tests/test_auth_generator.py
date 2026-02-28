@@ -8,6 +8,7 @@ import ast
 
 from picofun.auth_generator import _to_kebab_case, generate_auth_hooks
 from picofun.security import SecurityScheme
+from picofun.template import Template
 
 
 def test_to_kebab_case_camel() -> None:
@@ -35,13 +36,13 @@ def test_generate_apikey_header() -> None:
         param_name="X-API-Key",
     )
 
-    # Get template path
+    # Get template instance
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test-namespace", template_path)
+    code = generate_auth_hooks(scheme, "test-namespace", template)
 
     assert "def get_credentials(scheme_name: str) -> dict:" in code
     assert "def preprocessor(request):" in code
@@ -62,9 +63,9 @@ def test_generate_apikey_query() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test-namespace", template_path)
+    code = generate_auth_hooks(scheme, "test-namespace", template)
 
     assert 'request.params["api_key"]' in code
     assert 'creds["api_key"]' in code
@@ -82,9 +83,9 @@ def test_generate_apikey_cookie() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test-namespace", template_path)
+    code = generate_auth_hooks(scheme, "test-namespace", template)
 
     assert 'request.cookies["session_id"]' in code
     assert 'creds["api_key"]' in code
@@ -101,9 +102,9 @@ def test_generate_http_basic() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test-namespace", template_path)
+    code = generate_auth_hooks(scheme, "test-namespace", template)
 
     assert "import base64" in code
     assert "base64.b64encode" in code
@@ -125,9 +126,9 @@ def test_generate_http_bearer() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test-namespace", template_path)
+    code = generate_auth_hooks(scheme, "test-namespace", template)
 
     assert "Authorization" in code
     assert "Bearer" in code
@@ -144,9 +145,9 @@ def test_generate_mutual_tls() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test-namespace", template_path)
+    code = generate_auth_hooks(scheme, "test-namespace", template)
 
     assert "/tmp/picorun_cert.pem" in code
     assert "/tmp/picorun_key.pem" in code
@@ -166,9 +167,9 @@ def test_generated_code_syntax_valid() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test-namespace", template_path)
+    code = generate_auth_hooks(scheme, "test-namespace", template)
 
     # This will raise SyntaxError if code is invalid
     ast.parse(code)
@@ -186,9 +187,9 @@ def test_generated_code_has_preprocessor() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test-namespace", template_path)
+    code = generate_auth_hooks(scheme, "test-namespace", template)
 
     tree = ast.parse(code)
     function_names = [
@@ -211,9 +212,9 @@ def test_generated_code_namespace_substitution() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "my-service", template_path)
+    code = generate_auth_hooks(scheme, "my-service", template)
 
     assert "/picofun/my-service/credentials-" in code
 
@@ -230,9 +231,9 @@ def test_generated_code_scheme_name_substitution() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test", template_path)
+    code = generate_auth_hooks(scheme, "test", template)
 
     assert "myCustomAuth" in code
 
@@ -249,8 +250,8 @@ def test_generated_code_param_name_substitution() -> None:
     from picofun.config import Config
 
     config = Config()
-    template_path = str(config.template_path)
+    template = Template(config.template_path)
 
-    code = generate_auth_hooks(scheme, "test", template_path)
+    code = generate_auth_hooks(scheme, "test", template)
 
     assert "X-Custom-Key" in code

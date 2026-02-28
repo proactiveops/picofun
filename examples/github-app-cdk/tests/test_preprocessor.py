@@ -74,7 +74,9 @@ def test_preprocess_reads_correct_secret(
 
     preprocess(api_request_args)
 
-    mock_get_secret.assert_called_once_with("picofun/githubapp/token", max_age=300)
+    mock_get_secret.assert_called_once_with(
+        "picofun/githubapp/token", max_age=300, force_fetch=False
+    )
 
 
 def test_preprocess_uses_cache_ttl(
@@ -87,6 +89,47 @@ def test_preprocess_uses_cache_ttl(
 
     call_kwargs = mock_get_secret.call_args
     assert call_kwargs[1]["max_age"] == 300
+
+
+def test_preprocess_force_fetch(
+    mock_get_secret: MagicMock, api_request_args: MagicMock
+) -> None:
+    """Test that force_fetch=True bypasses cache."""
+    from helpers.github_auth.preprocessor import preprocess
+
+    preprocess(api_request_args, force_fetch=True)
+
+    mock_get_secret.assert_called_once_with(
+        "picofun/githubapp/token", max_age=300, force_fetch=True
+    )
+
+
+def test_get_token_default(
+    mock_get_secret: MagicMock,
+) -> None:
+    """Test that get_token fetches token with cache by default."""
+    from helpers.github_auth.preprocessor import get_token
+
+    token = get_token()
+
+    assert token == "ghs_test_installation_token_123"  # noqa: S105 Testing token
+    mock_get_secret.assert_called_once_with(
+        "picofun/githubapp/token", max_age=300, force_fetch=False
+    )
+
+
+def test_get_token_force_fetch(
+    mock_get_secret: MagicMock,
+) -> None:
+    """Test that get_token can bypass cache with force_fetch."""
+    from helpers.github_auth.preprocessor import get_token
+
+    token = get_token(force_fetch=True)
+
+    assert token == "ghs_test_installation_token_123"  # noqa: S105 Testing token
+    mock_get_secret.assert_called_once_with(
+        "picofun/githubapp/token", max_age=300, force_fetch=True
+    )
 
 
 def test_preprocess_returns_args(

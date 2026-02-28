@@ -7,6 +7,7 @@ __license__ = "MIT"
 import logging
 import os
 import typing
+from importlib.resources import files
 
 import typer
 
@@ -125,7 +126,11 @@ def main(
             )
             raise typer.Exit(code=1) from e
 
-    template = picofun.template.Template(config.template_path)
+    # Get default template path from package
+    default_template_path = os.path.join(str(files("picofun")), "templates")
+
+    # Create template with fallback: user override first, then default
+    template = picofun.template.Template(config.template_path, default_template_path)
 
     # Create endpoint filter
     endpoint_filter = picofun.endpoint_filter.EndpointFilter(config.include_endpoints)
@@ -136,7 +141,7 @@ def main(
     # Generate authentication hooks if enabled and scheme selected
     if config.auth_enabled and selected_scheme:
         auth_hooks_code = picofun.auth_generator.generate_auth_hooks(
-            selected_scheme, namespace, config.template_path
+            selected_scheme, namespace, template
         )
         auth_hooks_path = os.path.join(config.output_dir, "layer", "auth_hooks.py")
         os.makedirs(os.path.dirname(auth_hooks_path), exist_ok=True)

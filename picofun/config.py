@@ -429,6 +429,13 @@ class ConfigLoader:
                 config_dir = os.path.dirname(path)
                 config_data["bundle"] = os.path.join(config_dir, bundle)
 
+        # Resolve template_path relative to config file location
+        if config_data.get("template_path"):
+            template_path = str(config_data["template_path"])
+            if not os.path.isabs(template_path):
+                config_dir = os.path.dirname(path)
+                config_data["template_path"] = os.path.join(config_dir, template_path)
+
         try:
             return Config(**config_data)
         except ValidationError as e:

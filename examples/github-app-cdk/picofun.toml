@@ -3,6 +3,7 @@ iam_role_prefix = "pf-githubapp-"
 include_endpoints = "include-endpoints.yaml"
 bundle = "helpers"
 preprocessor = "github_auth.preprocessor.preprocess"
+template_path = "templates"
 
 [auth]
 enabled = false

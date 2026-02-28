@@ -10,6 +10,10 @@ updates:
       pytest:
         patterns:
           - "pytest*"
+      qa:
+        patterns:
+          - "ruff*"
+          - "ty*"
     open-pull-requests-limit: 10
 
   - package-ecosystem: "github-actions"

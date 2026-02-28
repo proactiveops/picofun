@@ -434,6 +434,23 @@ def test_configloader_bundle_relative() -> None:
         assert os.path.realpath(config.bundle) == os.path.realpath(bundle_path)
 
 
+def test_configloader_template_path_relative() -> None:
+    """Test loading a configuration with a relative template_path."""
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        config_path = os.path.join(tmp_dir, "picofun.toml")
+        with open(config_path, "w") as f:
+            f.write('template_path = "my_templates"\n')
+
+        template_path = os.path.join(tmp_dir, "my_templates")
+        os.makedirs(template_path)
+
+        loader = picofun.config.ConfigLoader(config_path)
+        config = loader.get_config()
+
+        assert config.template_path is not None
+        assert os.path.realpath(config.template_path) == os.path.realpath(template_path)
+
+
 def test_server_config_url_only() -> None:
     """Test ServerConfig with only URL specified."""
     server_config = picofun.config.ServerConfig(url="https://example.com")

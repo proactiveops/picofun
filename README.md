@@ -362,9 +362,21 @@ An example implementation of these hooks can be found in the [`examples/zendesk/
 
 The default templates bundled with PicoFun are usually adequate for most use cases. There are times where more customisation is needed. This could be to include custom logic in the Lambda function or additional resources in the terraform module.
 
-If you need to override one PicoFun template, you need to copy both from the package. The templates are located in the `templates` directory in the PicoFun package.
+You can override individual templates by specifying a `template_path` in your `picofun.toml` config file. PicoFun will search for templates in your custom directory first, and automatically fall back to the default templates for any templates not found in your custom directory. This means you only need to override the specific templates you want to customize.
 
-You can add the path to the templates to the `config.toml` file using the `template_path` entry.
+The default templates are located in the `templates` directory in the PicoFun package and include:
+- `auth_hooks.py.j2` - Authentication preprocessor code
+- `construct.py.j2` - AWS CDK construct definition  
+- `lambda.py.j2` - Lambda function handler
+- `main.tf.j2` - Terraform main configuration
+
+You can add the path to your custom templates directory in the `picofun.toml` file using the `template_path` entry. For example:
+
+```toml
+template_path = "templates"
+```
+
+With this configuration, you can create a `templates/` directory and place only the templates you want to override there. PicoFun will use your custom versions for those templates and the default versions for the rest.
 
 ## Infrastructure as Code
 

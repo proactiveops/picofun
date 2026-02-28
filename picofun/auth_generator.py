@@ -6,9 +6,8 @@ __license__ = "MIT"
 
 import re
 
-from jinja2 import Environment, FileSystemLoader
-
 from picofun.security import SecurityScheme
+from picofun.template import Template
 
 
 def _to_kebab_case(text: str) -> str:
@@ -27,7 +26,7 @@ def _to_kebab_case(text: str) -> str:
 
 
 def generate_auth_hooks(
-    scheme: SecurityScheme, namespace: str, template_path: str
+    scheme: SecurityScheme, namespace: str, template: Template
 ) -> str:
     """
     Generate Python authentication hook code from a security scheme.
@@ -38,17 +37,13 @@ def generate_auth_hooks(
     Args:
         scheme: The SecurityScheme to generate hooks for
         namespace: The namespace for SSM parameter paths
-        template_path: Path to the templates directory
+        template: Template instance for loading templates
 
     Returns:
         Generated Python code as a string
 
     """
-    env = Environment(
-        loader=FileSystemLoader(template_path),
-        autoescape=False,  # noqa: S701  We're generating Python code, not HTML
-    )
-    template = env.get_template("auth_hooks.py.j2")
+    auth_template = template.get("auth_hooks.py.j2")
 
     # Convert scheme type to kebab-case for SSM parameter naming
     scheme_type_kebab = _to_kebab_case(scheme.type)
@@ -64,4 +59,4 @@ def generate_auth_hooks(
         "scheme_bearer_format": scheme.bearer_format,
     }
 
-    return template.render(**context)
+    return auth_template.render(**context)

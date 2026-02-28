@@ -12,13 +12,34 @@ import jinja2
 class Template:
     """Manages Jinja2 templates."""
 
-    def __init__(self, base_path: str = "") -> None:
-        """Initialise TemplateLoader."""
+    def __init__(self, base_path: str = "", default_path: str | None = None) -> None:
+        """
+        Initialise TemplateLoader.
+
+        Args:
+            base_path: Primary template path (override path if default_path is provided)
+            default_path: Optional fallback path for templates not found in base_path
+
+        """
         if not os.path.isabs(base_path):
             base_path = os.path.join(os.getcwd(), base_path)
 
         path = os.path.realpath(base_path)
-        loader = jinja2.FileSystemLoader(path)
+
+        if default_path is not None:
+            if not os.path.isabs(default_path):
+                default_path = os.path.join(os.getcwd(), default_path)
+            default_path = os.path.realpath(default_path)
+
+            loader = jinja2.ChoiceLoader(
+                [
+                    jinja2.FileSystemLoader(path),
+                    jinja2.FileSystemLoader(default_path),
+                ]
+            )
+        else:
+            loader = jinja2.FileSystemLoader(path)
+
         self._environment = jinja2.Environment(loader=loader)  # noqa: S701 We're not generating HTML # nosec
 
         self.templates = {}

@@ -121,6 +121,26 @@ def test_generate_xray_tracing() -> None:
         assert "AWSXRayDaemonWriteAccess" in content
 
 
+def test_generate_layer_bundling() -> None:
+    """Test that layer uses Docker bundling for linux/arm64."""
+    config = picofun.config.Config()
+    tpl = picofun.template.Template("picofun/templates")
+    with tempfile.TemporaryDirectory() as out_dir:
+        config.output_dir = out_dir
+        generator = picofun.iac.cdk.CdkGenerator(tpl, "testlayer", config)
+        generator.generate(["test_lambda"])
+
+        output_file = os.path.join(out_dir, "construct.py")
+        with open(output_file) as f:
+            content = f.read()
+
+        assert "BundlingOptions" in content
+        assert 'platform="linux/arm64"' in content
+        assert "UV_CACHE_DIR=/tmp/uv-cache" in content
+        assert "uv pip install" in content
+        assert "mkdir -p /asset-output/python" in content
+
+
 def test_generate_exposes_functions_property() -> None:
     """Test that functions and role properties exist."""
     config = picofun.config.Config()

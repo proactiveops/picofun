@@ -98,7 +98,7 @@ resource "terraform_data" "layer" {
       mkdir -p ${local.lambda_layer_path}/python
       cp -a ${path.module}/layer/. ${local.lambda_layer_path}/python
       cd ${local.lambda_layer_path}/python
-      uv pip install . --target .
+      uv pip install -r pyproject.toml --target .
     EOT
   }
 

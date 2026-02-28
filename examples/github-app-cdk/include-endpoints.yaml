@@ -1,0 +1,17 @@
+paths:
+  - path: /repos/{owner}/{repo}
+    methods: [get, patch]
+  - path: /repos/{owner}/{repo}/pulls
+    methods: [get, post]
+  - path: /repos/{owner}/{repo}/pulls/{pull_number}
+    methods: [get, patch]
+  - path: /repos/{owner}/{repo}/pulls/{pull_number}/merge
+    methods: [put]
+  - path: /repos/{owner}/{repo}/commits
+    methods: [get]
+  - path: /repos/{owner}/{repo}/commits/{ref}
+    methods: [get]
+  - path: /repos/{owner}/{repo}/pulls/{pull_number}/reviews
+    methods: [get, post]
+  - path: /repos/{owner}/{repo}/pulls/{pull_number}/comments
+    methods: [get, post]

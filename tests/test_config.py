@@ -417,6 +417,23 @@ def test_configloader_include_endpoints_relative() -> None:
         )
 
 
+def test_configloader_bundle_relative() -> None:
+    """Test loading a configuration with a relative bundle path."""
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        config_path = os.path.join(tmp_dir, "picofun.toml")
+        with open(config_path, "w") as f:
+            f.write('bundle = "my_bundle"\n')
+
+        bundle_path = os.path.join(tmp_dir, "my_bundle")
+        os.makedirs(bundle_path)
+
+        loader = picofun.config.ConfigLoader(config_path)
+        config = loader.get_config()
+
+        assert config.bundle is not None
+        assert os.path.realpath(config.bundle) == os.path.realpath(bundle_path)
+
+
 def test_server_config_url_only() -> None:
     """Test ServerConfig with only URL specified."""
     server_config = picofun.config.ServerConfig(url="https://example.com")
@@ -629,6 +646,24 @@ def test_auth_ttl_validation_negative() -> None:
         picofun.config.Config(auth_ttl_minutes=-5)
 
     assert "auth_ttl_minutes" in str(exc_info.value)
+
+
+def test_auth_section_flattened_by_model_validator() -> None:
+    """Test that Config flattens a full auth dict into top-level fields."""
+    config = picofun.config.Config.model_validate(
+        {"auth": {"enabled": False, "ttl_minutes": 30}}
+    )
+
+    assert config.auth_enabled is False
+    assert config.auth_ttl_minutes == 30
+
+
+def test_auth_section_partial_flattened_by_model_validator() -> None:
+    """Test that Config flattens a partial auth dict into top-level fields."""
+    config = picofun.config.Config.model_validate({"auth": {"ttl_minutes": 20}})
+
+    assert config.auth_enabled is True
+    assert config.auth_ttl_minutes == 20
 
 
 def test_config_iac_default() -> None:

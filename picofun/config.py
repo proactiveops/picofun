@@ -64,6 +64,19 @@ class Config(BaseModel, extra="forbid", validate_assignment=True):
     vpc_id: str | None = None
     xray_tracing: bool = True
 
+    @model_validator(mode="before")
+    @classmethod
+    def flatten_auth_section(cls, data: dict[str, typing.Any]) -> dict[str, typing.Any]:
+        """Flatten the [auth] TOML section into top-level auth_* fields."""
+        if "auth" in data:
+            auth_section = data.pop("auth")
+            if "enabled" in auth_section:
+                data["auth_enabled"] = auth_section["enabled"]
+            if "ttl_minutes" in auth_section:
+                data["auth_ttl_minutes"] = auth_section["ttl_minutes"]
+
+        return data
+
     @model_validator(mode="after")
     def validate_subnets_vpc(self) -> "Config":
         """
@@ -409,13 +422,12 @@ class ConfigLoader:
                     config_dir, include_endpoints
                 )
 
-        # Flatten [auth] section if present
-        if "auth" in config_data:
-            auth_section = config_data.pop("auth")
-            if "enabled" in auth_section:
-                config_data["auth_enabled"] = auth_section["enabled"]
-            if "ttl_minutes" in auth_section:
-                config_data["auth_ttl_minutes"] = auth_section["ttl_minutes"]
+        # Resolve bundle path relative to config file location
+        if config_data.get("bundle"):
+            bundle = str(config_data["bundle"])
+            if not os.path.isabs(bundle):
+                config_dir = os.path.dirname(path)
+                config_data["bundle"] = os.path.join(config_dir, bundle)
 
         try:
             return Config(**config_data)

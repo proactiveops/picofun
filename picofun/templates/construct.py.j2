@@ -5,6 +5,7 @@
 from pathlib import Path
 
 from aws_cdk import (
+    BundlingOptions,
     Duration,
     RemovalPolicy,
     Tags,
@@ -117,7 +118,23 @@ class {{ namespace | capitalize }}Functions(Construct):
             self,
             "Layer",
             layer_version_name="{{ namespace }}",
-            code=lambda_.Code.from_asset(str(_MODULE_DIR / "layer")),
+            code=lambda_.Code.from_asset(
+                str(_MODULE_DIR / "layer"),
+                bundling=BundlingOptions(
+                    image=lambda_.Runtime.PYTHON_3_13.bundling_image,
+                    platform="linux/arm64",
+                    command=[
+                        "bash",
+                        "-c",
+                        "export UV_CACHE_DIR=/tmp/uv-cache"
+                        " && pip install uv"
+                        " && mkdir -p /asset-output/python"
+                        " && cp -a . /asset-output/python/"
+                        " && cd /asset-output/python"
+                        " && uv pip install --target . -r pyproject.toml",
+                    ],
+                ),
+            ),
             compatible_runtimes=[lambda_.Runtime.PYTHON_3_13],
             compatible_architectures=[lambda_.Architecture.ARM_64],
         )
@@ -140,9 +157,7 @@ class {{ namespace | capitalize }}Functions(Construct):
             handler="{{ lambda_name }}.handler",
             code=lambda_.Code.from_asset(
                 str(_MODULE_DIR / "lambdas"),
-                exclude=["*"],
-                # CDK does not support single-file assets directly; use bundling
-                # or copy individual files. Here we include only this function.
+                exclude=["*", "!{{ lambda_name }}.py"],
             ),
             role=self._role,
             timeout=Duration.seconds(10),

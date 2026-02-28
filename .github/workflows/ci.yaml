@@ -30,7 +30,7 @@ jobs:
         run: uv run ty check --output-format=github .
 
       - name: pytest
-        run: uv run coverage run -m pytest
+        run: uv run coverage run -m pytest tests
 
       - name: coverage
         run: uv run coverage report

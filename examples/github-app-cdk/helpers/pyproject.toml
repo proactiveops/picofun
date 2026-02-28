@@ -1,0 +1,12 @@
+[project]
+name = "picofun-github-app-layer"
+version = "0.1.0"
+description = "Lambda layer dependencies for GitHub App authentication"
+requires-python = ">=3.13"
+dependencies = [
+    "aws-lambda-powertools",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

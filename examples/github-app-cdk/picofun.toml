@@ -1,0 +1,15 @@
+iac = "cdk"
+iam_role_prefix = "pf-githubapp-"
+include_endpoints = "include-endpoints.yaml"
+bundle = "helpers"
+preprocessor = "github_auth.preprocessor.preprocess"
+
+[auth]
+enabled = false
+
+[server]
+url = "https://api.github.com"
+
+[tags]
+app = "picofun-github-app"
+env = "poc"

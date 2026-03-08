@@ -2,17 +2,13 @@
 
 from typing import Any
 
+{% if preprocessor %}import {{ preprocessor }}
+{% endif %}{% if postprocessor %}import {{ postprocessor }}
+{% endif %}import picorun
 import requests
-from aws_lambda_powertools import Logger
-{% if xray_tracing %}from aws_lambda_powertools import Tracer
-{% endif %}
+from aws_lambda_powertools import Logger{% if xray_tracing %}, Tracer{% endif %}
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-import picorun
-
-{% if preprocessor %}import {{preprocessor}}
-{% endif %}{% if postprocessor %}import {{postprocessor}}
-{% endif %}
 logger = Logger()
 {% if xray_tracing %}tracer = Tracer()
 {% endif %}
@@ -20,11 +16,11 @@ logger = Logger()
 
 @logger.inject_lambda_context
 {% if xray_tracing %}@tracer.capture_lambda_handler
-{% endif %} 
+{% endif %}
 def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
     """{{ details.summary | default('') }}."""
     properties = picorun.ApiRequestArgs(**event)
-    {% if preprocessor_handler %}properties = {{preprocessor_handler}}(properties){% endif %}
+    {% if preprocessor_handler %}properties = {{ preprocessor_handler }}(properties){% endif %}
     url = "{{ base_url }}{{ path }}".format(**properties.path)
 
     timeout = context.get_remaining_time_in_millis() - 1000
@@ -32,5 +28,5 @@ def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
     response.raise_for_status()
 
     out = picorun.ApiResponse(response)
-    {% if postprocessor_handler %}response = {{postprocessor_handler}}(out){% endif %}
+    {% if postprocessor_handler %}response = {{ postprocessor_handler }}(out){% endif %}
     return out.asdict()

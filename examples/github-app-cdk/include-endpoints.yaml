@@ -15,3 +15,5 @@ paths:
     methods: [get, post]
   - path: /repos/{owner}/{repo}/pulls/{pull_number}/comments
     methods: [get, post]
+  - path: /repos/{owner}/{repo}/actions/secrets/public-key
+    methods: [get]

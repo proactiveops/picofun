@@ -37,6 +37,19 @@ def test_get_name_with_dot() -> None:
     assert generator._get_name("method", "path.json") == "method_path_json"
 
 
+def test_get_name_with_dash() -> None:
+    """Test getting the name of the lambda when path contains a dash (-)."""
+    tpl = picofun.template.Template("tests/data/templates")
+    generator = picofun.lambda_generator.LambdaGenerator(
+        tpl, "", picofun.config.Config()
+    )
+
+    assert (
+        generator._get_name("get", "/actions/secrets/public-key")
+        == "get_actions_secrets_public_key"
+    )
+
+
 def test_get_name_too_long() -> None:
     """Test getting the name of the lambda."""
     tpl = picofun.template.Template("tests/data/templates")

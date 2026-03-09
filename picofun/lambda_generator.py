@@ -45,9 +45,7 @@ class LambdaGenerator:
 
     def _get_name(self, method: str, path: str) -> str:
         clean_path = path.replace("{", "").replace("}", "")
-        lambda_name = (
-            f"{method}_{clean_path.replace('/', '_').replace('.', '_').strip('_')}"
-        )
+        lambda_name = f"{method}_{clean_path.replace('/', '_').replace('.', '_').replace('-', '_').strip('_')}"
 
         if len(lambda_name) > self.max_length:
             suffix = hashlib.sha512(lambda_name.encode()).hexdigest()[

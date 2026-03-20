@@ -6,7 +6,7 @@ __license__ = "MIT"
 
 import re
 
-from picofun.security import SecurityScheme
+from picofun.models import SecurityScheme
 from picofun.template import Template
 
 

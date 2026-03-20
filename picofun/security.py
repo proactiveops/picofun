@@ -4,53 +4,29 @@ __author__ = "Dave Hall <skwashd@gmail.com>"
 __copyright__ = "Copyright 2026, Dave Hall https://proactiveops.io"
 __license__ = "MIT"
 
-from dataclasses import dataclass
-
 from picofun.errors import UnsupportedSecuritySchemeError
+from picofun.models import SecurityScheme
 
 
-@dataclass
-class SecurityScheme:
-    """
-    Represents an OpenAPI security scheme.
-
-    Attributes:
-        name: Reference name from the spec
-        type: One of: apiKey, http, mutualTLS, oauth2, openIdConnect
-        param_name: For apiKey: the header/query/cookie parameter name
-        location: For apiKey: header, query, or cookie
-        scheme: For http: basic or bearer
-        bearer_format: For http bearer: optional format hint
-
-    """
-
-    name: str
-    type: str
-    param_name: str | None = None
-    location: str | None = None
-    scheme: str | None = None
-    bearer_format: str | None = None
-
-
-def extract_security_schemes(spec: dict) -> dict[str, SecurityScheme]:
+def extract_security_schemes(spec: dict) -> list[SecurityScheme]:
     """
     Extract security schemes from an OpenAPI specification.
 
     Parses the components.securitySchemes section of an OpenAPI spec
-    and returns a dictionary mapping scheme names to SecurityScheme objects.
+    and returns a list of SecurityScheme objects.
 
     Args:
         spec: The OpenAPI specification as a dictionary
 
     Returns:
-        Dictionary mapping scheme names to SecurityScheme objects.
-        Returns empty dict if no securitySchemes are defined.
+        List of SecurityScheme objects.
+        Returns empty list if no securitySchemes are defined.
 
     """
     components = spec.get("components", {})
     security_schemes = components.get("securitySchemes", {})
 
-    result = {}
+    result = []
     for name, scheme_def in security_schemes.items():
         scheme_type = scheme_def.get("type")
 
@@ -62,7 +38,7 @@ def extract_security_schemes(spec: dict) -> dict[str, SecurityScheme]:
             scheme=scheme_def.get("scheme"),
             bearer_format=scheme_def.get("bearerFormat"),
         )
-        result[name] = security_scheme
+        result.append(security_scheme)
 
     return result
 
@@ -148,7 +124,7 @@ def get_scheme_type_kebab(scheme: SecurityScheme) -> str:
 
 
 def select_security_scheme(
-    schemes: dict[str, SecurityScheme], global_security: list[str]
+    schemes: list[SecurityScheme], global_security: list[str]
 ) -> SecurityScheme | None:
     """
     Select the highest priority supported security scheme.
@@ -163,7 +139,7 @@ def select_security_scheme(
     6. mutualTLS
 
     Args:
-        schemes: Dictionary of available security schemes
+        schemes: List of available security schemes
         global_security: List of scheme names referenced in global security
 
     Returns:
@@ -178,22 +154,18 @@ def select_security_scheme(
         return None
 
     # Filter to only schemes referenced in global security
-    referenced_schemes = {
-        name: scheme for name, scheme in schemes.items() if name in global_security
-    }
+    referenced_schemes = [s for s in schemes if s.name in global_security]
 
     if not referenced_schemes:
         return None
 
     # Separate supported and unsupported schemes
     supported_schemes = [
-        scheme for scheme in referenced_schemes.values() if _is_supported_scheme(scheme)
+        scheme for scheme in referenced_schemes if _is_supported_scheme(scheme)
     ]
 
     unsupported_scheme_names = [
-        name
-        for name, scheme in referenced_schemes.items()
-        if _is_unsupported_scheme(scheme)
+        scheme.name for scheme in referenced_schemes if _is_unsupported_scheme(scheme)
     ]
 
     # If only unsupported schemes exist, raise error

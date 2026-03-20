@@ -213,3 +213,49 @@ class UnknownServerVariableError(ValueError):
         super().__init__(
             f"Server variable '{variable}' in config is not defined in the spec. Available variables: {available}"
         )
+
+
+class InvalidParserPluginError(TypeError):
+    """Exception thrown when a parser plugin is not a BaseParser subclass."""
+
+    def __init__(self, plugin_name: str) -> None:
+        """
+        Initialise InvalidParserPluginError.
+
+        :param plugin_name: The name of the invalid plugin.
+        """
+        super().__init__(f"Parser plugin '{plugin_name}' is not a BaseParser subclass")
+
+
+class DuplicateParserFormatError(ValueError):
+    """Exception thrown when multiple parsers register the same format_name."""
+
+    def __init__(self, format_name: str) -> None:
+        """
+        Initialise DuplicateParserFormatError.
+
+        :param format_name: The duplicated format name.
+        """
+        super().__init__(f"Duplicate parser format_name: '{format_name}'")
+
+
+class UnsupportedSpecFormatError(Exception):
+    """Exception thrown when no parser supports the given spec format."""
+
+    def __init__(
+        self, format_name: str | None = None, available: list[str] | None = None
+    ) -> None:
+        """
+        Initialise UnsupportedSpecFormatError.
+
+        :param format_name: The requested format name (if any).
+        :param available: List of available format names.
+        """
+        available_str = ", ".join(available) if available else "none"
+        if format_name:
+            msg = f"No parser found for format '{format_name}'. Available formats: {available_str}"
+        else:
+            msg = (
+                f"Could not auto-detect spec format. Available formats: {available_str}"
+            )
+        super().__init__(msg)

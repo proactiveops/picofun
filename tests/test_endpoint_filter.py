@@ -12,6 +12,7 @@ import yaml
 
 import picofun.endpoint_filter
 import picofun.errors
+from picofun.models import Endpoint
 
 
 class TestEndpointFilter:
@@ -20,8 +21,8 @@ class TestEndpointFilter:
     def test_no_filter_file_includes_all(self) -> None:
         """When no filter file is provided, all endpoints are included."""
         ef = picofun.endpoint_filter.EndpointFilter()
-        assert ef.is_included("/users", "get", {}) is True
-        assert ef.is_included("/anything", "post", {}) is True
+        assert ef.is_included(Endpoint(path="/users", method="get")) is True
+        assert ef.is_included(Endpoint(path="/anything", method="post")) is True
 
     def test_missing_file_raises_error(self) -> None:
         """Missing filter file raises EndpointFilterFileNotFoundError."""
@@ -81,44 +82,44 @@ class TestPathMatching:
     def test_exact_path_match(self) -> None:
         """Exact path matches."""
         ef = self._create_filter([{"path": "/users"}])
-        assert ef.is_included("/users", "get", {}) is True
-        assert ef.is_included("/users/123", "get", {}) is False
+        assert ef.is_included(Endpoint(path="/users", method="get")) is True
+        assert ef.is_included(Endpoint(path="/users/123", method="get")) is False
 
     def test_single_wildcard(self) -> None:
         """Single wildcard matches one segment."""
         ef = self._create_filter([{"path": "/users/*"}])
-        assert ef.is_included("/users/123", "get", {}) is True
-        assert ef.is_included("/users/abc", "get", {}) is True
-        assert ef.is_included("/users", "get", {}) is False
-        assert ef.is_included("/users/123/orders", "get", {}) is False
+        assert ef.is_included(Endpoint(path="/users/123", method="get")) is True
+        assert ef.is_included(Endpoint(path="/users/abc", method="get")) is True
+        assert ef.is_included(Endpoint(path="/users", method="get")) is False
+        assert ef.is_included(Endpoint(path="/users/123/orders", method="get")) is False
 
     def test_double_wildcard(self) -> None:
         """Double wildcard matches multiple segments."""
         ef = self._create_filter([{"path": "/users/**"}])
-        assert ef.is_included("/users/123", "get", {}) is True
-        assert ef.is_included("/users/123/orders", "get", {}) is True
-        assert ef.is_included("/users/123/orders/456", "get", {}) is True
-        assert ef.is_included("/users", "get", {}) is False
+        assert ef.is_included(Endpoint(path="/users/123", method="get")) is True
+        assert ef.is_included(Endpoint(path="/users/123/orders", method="get")) is True
+        assert ef.is_included(Endpoint(path="/users/123/orders/456", method="get")) is True
+        assert ef.is_included(Endpoint(path="/users", method="get")) is False
 
     def test_method_filter(self) -> None:
         """Methods filter restricts which methods are allowed."""
         ef = self._create_filter([{"path": "/users", "methods": ["get", "post"]}])
-        assert ef.is_included("/users", "get", {}) is True
-        assert ef.is_included("/users", "post", {}) is True
-        assert ef.is_included("/users", "delete", {}) is False
+        assert ef.is_included(Endpoint(path="/users", method="get")) is True
+        assert ef.is_included(Endpoint(path="/users", method="post")) is True
+        assert ef.is_included(Endpoint(path="/users", method="delete")) is False
 
     def test_method_case_insensitive(self) -> None:
         """Method matching is case-insensitive."""
         ef = self._create_filter([{"path": "/users", "methods": ["GET", "Post"]}])
-        assert ef.is_included("/users", "get", {}) is True
-        assert ef.is_included("/users", "post", {}) is True
+        assert ef.is_included(Endpoint(path="/users", method="get")) is True
+        assert ef.is_included(Endpoint(path="/users", method="post")) is True
 
     def test_no_methods_allows_all(self) -> None:
         """Omitting methods allows all HTTP methods."""
         ef = self._create_filter([{"path": "/users"}])
-        assert ef.is_included("/users", "get", {}) is True
-        assert ef.is_included("/users", "post", {}) is True
-        assert ef.is_included("/users", "delete", {}) is True
+        assert ef.is_included(Endpoint(path="/users", method="get")) is True
+        assert ef.is_included(Endpoint(path="/users", method="post")) is True
+        assert ef.is_included(Endpoint(path="/users", method="delete")) is True
 
 
 class TestOperationIdMatching:
@@ -139,16 +140,14 @@ class TestOperationIdMatching:
     def test_operation_id_match(self) -> None:
         """Matching operationId includes endpoint."""
         ef = self._create_filter(["getUser", "createUser"])
-        assert ef.is_included("/users", "get", {"operationId": "getUser"}) is True
-        assert ef.is_included("/users", "post", {"operationId": "createUser"}) is True
-        assert (
-            ef.is_included("/users", "delete", {"operationId": "deleteUser"}) is False
-        )
+        assert ef.is_included(Endpoint(path="/users", method="get", operation_id="getUser")) is True
+        assert ef.is_included(Endpoint(path="/users", method="post", operation_id="createUser")) is True
+        assert ef.is_included(Endpoint(path="/users", method="delete", operation_id="deleteUser")) is False
 
     def test_no_operation_id_in_details(self) -> None:
         """Endpoint without operationId doesn't match operationId filter."""
         ef = self._create_filter(["getUser"])
-        assert ef.is_included("/users", "get", {}) is False
+        assert ef.is_included(Endpoint(path="/users", method="get")) is False
 
 
 class TestTagMatching:
@@ -167,19 +166,19 @@ class TestTagMatching:
     def test_tag_match(self) -> None:
         """Matching tag includes endpoint."""
         ef = self._create_filter(["public", "v2"])
-        assert ef.is_included("/users", "get", {"tags": ["public"]}) is True
-        assert ef.is_included("/users", "get", {"tags": ["v2"]}) is True
-        assert ef.is_included("/users", "get", {"tags": ["internal"]}) is False
+        assert ef.is_included(Endpoint(path="/users", method="get", tags=["public"])) is True
+        assert ef.is_included(Endpoint(path="/users", method="get", tags=["v2"])) is True
+        assert ef.is_included(Endpoint(path="/users", method="get", tags=["internal"])) is False
 
     def test_multiple_tags_any_match(self) -> None:
         """Any matching tag includes the endpoint."""
         ef = self._create_filter(["public"])
-        assert ef.is_included("/users", "get", {"tags": ["internal", "public"]}) is True
+        assert ef.is_included(Endpoint(path="/users", method="get", tags=["internal", "public"])) is True
 
     def test_no_tags_in_details(self) -> None:
         """Endpoint without tags doesn't match tag filter."""
         ef = self._create_filter(["public"])
-        assert ef.is_included("/users", "get", {}) is False
+        assert ef.is_included(Endpoint(path="/users", method="get")) is False
 
 
 class TestOrLogic:
@@ -196,11 +195,11 @@ class TestOrLogic:
                 os.unlink(f.name)
 
         # Matches path
-        assert ef.is_included("/users", "get", {}) is True
+        assert ef.is_included(Endpoint(path="/users", method="get")) is True
         # Matches operationId
-        assert ef.is_included("/orders", "get", {"operationId": "getOrders"}) is True
+        assert ef.is_included(Endpoint(path="/orders", method="get", operation_id="getOrders")) is True
         # Matches neither
-        assert ef.is_included("/products", "get", {}) is False
+        assert ef.is_included(Endpoint(path="/products", method="get")) is False
 
     def test_all_three_sections(self) -> None:
         """Endpoint included if path OR operationId OR tags matches."""
@@ -220,10 +219,10 @@ class TestOrLogic:
                 os.unlink(f.name)
 
         # Matches path only
-        assert ef.is_included("/users", "get", {}) is True
+        assert ef.is_included(Endpoint(path="/users", method="get")) is True
         # Matches operationId only
-        assert ef.is_included("/orders", "get", {"operationId": "getOrders"}) is True
+        assert ef.is_included(Endpoint(path="/orders", method="get", operation_id="getOrders")) is True
         # Matches tag only
-        assert ef.is_included("/products", "get", {"tags": ["public"]}) is True
+        assert ef.is_included(Endpoint(path="/products", method="get", tags=["public"])) is True
         # Matches nothing
-        assert ef.is_included("/internal", "get", {"tags": ["internal"]}) is False
+        assert ef.is_included(Endpoint(path="/internal", method="get", tags=["internal"])) is False

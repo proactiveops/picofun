@@ -175,6 +175,30 @@ class UnsupportedSecuritySchemeError(Exception):
         )
 
 
+class CircularRefError(ValueError):
+    """Exception thrown when a circular $ref is detected."""
+
+    def __init__(self, ref_path: str) -> None:
+        """
+        Initialise CircularRefError.
+
+        :param ref_path: The $ref path that forms a cycle.
+        """
+        super().__init__(f"Circular $ref detected: {ref_path}")
+
+
+class RefPathNotFoundError(ValueError):
+    """Exception thrown when a $ref path cannot be resolved."""
+
+    def __init__(self, ref_path: str) -> None:
+        """
+        Initialise RefPathNotFoundError.
+
+        :param ref_path: The $ref path that could not be resolved.
+        """
+        super().__init__(f"Cannot resolve $ref path: {ref_path}")
+
+
 class UnknownServerVariableError(ValueError):
     """Exception thrown when a config variable is not in the spec's server object."""
 

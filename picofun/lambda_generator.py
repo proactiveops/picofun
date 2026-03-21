@@ -7,7 +7,6 @@ __license__ = "MIT"
 import hashlib
 import logging
 import os
-import typing
 
 import black
 
@@ -15,6 +14,7 @@ import picofun.config
 import picofun.endpoint_filter
 import picofun.errors
 import picofun.template
+from picofun.models import ApiSpec, Endpoint, Server, ServerVariable
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +56,13 @@ class LambdaGenerator:
 
         return lambda_name
 
-    def _validate_config_variables(self, spec_variables: dict[str, typing.Any]) -> None:
+    def _validate_config_variables(
+        self, spec_variables: dict[str, ServerVariable]
+    ) -> None:
         """
         Validate that config variables exist in spec.
 
-        :param spec_variables: The variables object from OpenAPI server spec.
+        :param spec_variables: The variables from the Server model.
         :raises UnknownServerVariableError: If a config variable is not in spec.
         """
         if not self._config.server or not self._config.server.variables:
@@ -74,14 +76,13 @@ class LambdaGenerator:
                 )
 
     def _build_variable_values(
-        self, spec_variables: dict[str, typing.Any]
+        self, spec_variables: dict[str, ServerVariable]
     ) -> dict[str, str]:
         """
         Build final variable values from spec defaults and config overrides.
 
-        :param spec_variables: The variables object from OpenAPI server spec.
+        :param spec_variables: The variables from the Server model.
         :return: Dictionary of variable names to values.
-        :raises MissingServerVariableError: If a variable lacks a default value.
         """
         final_variables = {}
         for var_name, var_spec in spec_variables.items():
@@ -90,46 +91,36 @@ class LambdaGenerator:
                 and self._config.server.variables
                 and var_name in self._config.server.variables
             ):
-                # Use config value
                 final_variables[var_name] = self._config.server.variables[var_name]
-            elif "default" in var_spec:
-                # Use spec default
-                final_variables[var_name] = var_spec["default"]
             else:
-                # No default and not provided in config
-                raise picofun.errors.MissingServerVariableError(var_name)
+                # ServerVariable.default is required, so it always exists
+                final_variables[var_name] = var_spec.default
         return final_variables
 
-    def _resolve_server_url(self, server_spec: dict[str, typing.Any]) -> str:
+    def _resolve_server_url(self, server: Server) -> str:
         """
         Resolve server URL from spec with config overrides.
 
-        :param server_spec: The server object from OpenAPI spec.
+        :param server: The Server model from ApiSpec.
         :return: The resolved server URL.
-        :raises MissingServerVariableError: If a variable lacks a default value.
         :raises UnknownServerVariableError: If a config variable is not in spec.
         """
-        # If config provides a full URL override, use it directly
         if self._config.server and self._config.server.url:
             return self._config.server.url
 
-        base_url = server_spec["url"]
-        spec_variables = server_spec.get("variables", {})
+        base_url = server.url
+        spec_variables = server.variables
 
-        # If spec has no variables, return URL as-is
         if not spec_variables:
-            # If config tries to provide variables when spec has none, raise error
             if self._config.server and self._config.server.variables:
                 raise picofun.errors.UnknownServerVariableError(
                     next(iter(self._config.server.variables.keys())), []
                 )
             return base_url
 
-        # Validate config variables and build final values
         self._validate_config_variables(spec_variables)
         final_variables = self._build_variable_values(spec_variables)
 
-        # Replace all tokens in the URL
         resolved_url = base_url
         for var_name, var_value in final_variables.items():
             token = f"{{{var_name}}}"
@@ -139,7 +130,7 @@ class LambdaGenerator:
 
     def generate(
         self,
-        api_data: dict[str, typing.Any],
+        api_spec: ApiSpec,
     ) -> list[str]:
         """Generate the lambda functions."""
         output_dir = self._config_dict["output_dir"]
@@ -148,44 +139,34 @@ class LambdaGenerator:
         if not os.path.exists(lambda_dir):
             os.makedirs(lambda_dir, exist_ok=True)
 
-        base_url = self._resolve_server_url(api_data["servers"][0])
+        base_url = self._resolve_server_url(api_spec.servers[0])
 
         lambdas = []
-        for path, path_details in api_data["paths"].items():
-            for method, details in path_details.items():
-                if method not in ["get", "put", "post", "delete", "patch", "head"]:
-                    continue
-
-                # Check if endpoint should be included
-                if not self._endpoint_filter.is_included(path, method, details):
-                    logger.debug(
-                        "Skipping excluded endpoint: %s %s", method.upper(), path
-                    )
-                    continue
-
-                lambda_name = self._get_name(method, path)
-
-                code = self.render(
-                    base_url,
-                    method,
-                    path,
-                    details,
+        for endpoint in api_spec.endpoints:
+            if not self._endpoint_filter.is_included(endpoint):
+                logger.debug(
+                    "Skipping excluded endpoint: %s %s",
+                    endpoint.method.upper(),
+                    endpoint.path,
                 )
+                continue
 
-                script_filename = f"{lambda_name}.py"
-                script_path = os.path.join(lambda_dir, script_filename)
-                with open(script_path, "w") as file:
-                    file.write(code)
+            lambda_name = self._get_name(endpoint.method, endpoint.path)
 
-                logger.info("Generated function: %s", script_path)
-                lambdas.append(lambda_name)
+            code = self.render(base_url, endpoint)
+
+            script_filename = f"{lambda_name}.py"
+            script_path = os.path.join(lambda_dir, script_filename)
+            with open(script_path, "w") as file:
+                file.write(code)
+
+            logger.info("Generated function: %s", script_path)
+            lambdas.append(lambda_name)
 
         lambdas.sort()
         return lambdas
 
-    def render(
-        self, base_url: str, method: str, path: str, details: dict[str, typing.Any]
-    ) -> str:
+    def render(self, base_url: str, endpoint: Endpoint) -> str:
         """Render the lambda function."""
         preprocessor_handler = self._config_dict["preprocessor"]
         preprocessor = (
@@ -204,9 +185,10 @@ class LambdaGenerator:
         code = self._template.render(
             "lambda.py.j2",
             base_url=base_url,
-            method=method,
-            path=path,
-            details=details,
+            method=endpoint.method,
+            path=endpoint.path,
+            summary=endpoint.summary,
+            details=endpoint.extra,
             preprocessor=preprocessor,
             preprocessor_handler=preprocessor_handler,
             postprocessor=postprocessor,

@@ -136,20 +136,6 @@ class InvalidSpecError(Exception):
         super().__init__("The spec file isn't valid JSON or YAML")
 
 
-class MissingServerVariableError(ValueError):
-    """Exception thrown when a server variable lacks a default value."""
-
-    def __init__(self, variable: str) -> None:
-        """
-        Initialise MissingServerVariableError.
-
-        :param variable: The name of the variable missing a default value.
-        """
-        super().__init__(
-            f"Server variable '{variable}' does not have a default value in the spec and was not provided in config."
-        )
-
-
 class UnknownConfigValueError(AttributeError):
     """Exception thrown when an unknown configuration value is specified."""
 
@@ -175,6 +161,30 @@ class UnsupportedSecuritySchemeError(Exception):
         )
 
 
+class CircularRefError(ValueError):
+    """Exception thrown when a circular $ref is detected."""
+
+    def __init__(self, ref_path: str) -> None:
+        """
+        Initialise CircularRefError.
+
+        :param ref_path: The $ref path that forms a cycle.
+        """
+        super().__init__(f"Circular $ref detected: {ref_path}")
+
+
+class RefPathNotFoundError(ValueError):
+    """Exception thrown when a $ref path cannot be resolved."""
+
+    def __init__(self, ref_path: str) -> None:
+        """
+        Initialise RefPathNotFoundError.
+
+        :param ref_path: The $ref path that could not be resolved.
+        """
+        super().__init__(f"Cannot resolve $ref path: {ref_path}")
+
+
 class UnknownServerVariableError(ValueError):
     """Exception thrown when a config variable is not in the spec's server object."""
 
@@ -189,3 +199,49 @@ class UnknownServerVariableError(ValueError):
         super().__init__(
             f"Server variable '{variable}' in config is not defined in the spec. Available variables: {available}"
         )
+
+
+class InvalidParserPluginError(TypeError):
+    """Exception thrown when a parser plugin is not a BaseParser subclass."""
+
+    def __init__(self, plugin_name: str) -> None:
+        """
+        Initialise InvalidParserPluginError.
+
+        :param plugin_name: The name of the invalid plugin.
+        """
+        super().__init__(f"Parser plugin '{plugin_name}' is not a BaseParser subclass")
+
+
+class DuplicateParserFormatError(ValueError):
+    """Exception thrown when multiple parsers register the same format_name."""
+
+    def __init__(self, format_name: str) -> None:
+        """
+        Initialise DuplicateParserFormatError.
+
+        :param format_name: The duplicated format name.
+        """
+        super().__init__(f"Duplicate parser format_name: '{format_name}'")
+
+
+class UnsupportedSpecFormatError(Exception):
+    """Exception thrown when no parser supports the given spec format."""
+
+    def __init__(
+        self, format_name: str | None = None, available: list[str] | None = None
+    ) -> None:
+        """
+        Initialise UnsupportedSpecFormatError.
+
+        :param format_name: The requested format name (if any).
+        :param available: List of available format names.
+        """
+        available_str = ", ".join(available) if available else "none"
+        if format_name:
+            msg = f"No parser found for format '{format_name}'. Available formats: {available_str}"
+        else:
+            msg = (
+                f"Could not auto-detect spec format. Available formats: {available_str}"
+            )
+        super().__init__(msg)

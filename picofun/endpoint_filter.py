@@ -12,6 +12,7 @@ from typing import Any
 import yaml
 
 import picofun.errors
+from picofun.models import Endpoint
 
 logger = logging.getLogger(__name__)
 
@@ -143,31 +144,22 @@ class EndpointFilter:
             return False
         return bool(set(endpoint_tags) & set(self._tags))
 
-    def is_included(
-        self,
-        path: str,
-        method: str,
-        details: dict[str, Any],
-    ) -> bool:
+    def is_included(self, endpoint: Endpoint) -> bool:
         """
         Determine if an endpoint should be included.
 
-        :param path: The OpenAPI path.
-        :param method: The HTTP method (will be lowercased).
-        :param details: The endpoint details from the OpenAPI spec.
+        :param endpoint: The Endpoint object.
         :return: True if the endpoint should be included.
         """
-        # No filters configured = include everything
         if not self._has_filters:
             return True
 
-        method = method.lower()
-        operation_id = details.get("operationId")
-        endpoint_tags = details.get("tags")
+        method = endpoint.method.lower()
+        operation_id = endpoint.operation_id
+        endpoint_tags = endpoint.tags or None
 
-        # OR logic: include if ANY filter matches
         return (
-            self._match_path(path, method)
+            self._match_path(endpoint.path, method)
             or self._match_operation_id(operation_id)
             or self._match_tags(endpoint_tags)
         )

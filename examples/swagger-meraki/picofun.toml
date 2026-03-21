@@ -1,0 +1,7 @@
+iac = "cdk"
+iam_role_prefix = "pf-meraki-"
+include_endpoints = "include-endpoints.yaml"
+
+[tags]
+app = "picofun-meraki"
+env = "poc"

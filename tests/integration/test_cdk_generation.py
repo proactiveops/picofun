@@ -97,3 +97,32 @@ def test_generate_cdk_shorthand_flag() -> None:
 
         main_tf_path = os.path.join(tmpdir, "main.tf")
         assert not os.path.exists(main_tf_path)
+
+
+def test_generate_cdk_swagger2() -> None:
+    """Test CDK generation with Swagger 2.0 spec."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result = runner.invoke(
+            app,
+            [
+                "testswagger",
+                "tests/fixtures/swagger2_apikey_auth.yaml",
+                "--cdk",
+                "--output-dir",
+                tmpdir,
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        construct_path = os.path.join(tmpdir, "construct.py")
+        assert os.path.exists(construct_path)
+
+        main_tf_path = os.path.join(tmpdir, "main.tf")
+        assert not os.path.exists(main_tf_path)
+
+        with open(construct_path) as f:
+            content = f.read()
+            assert "class TestswaggerFunctions(Construct):" in content
+            assert "ssm.StringParameter" in content
+            assert "credentials-api-key" in content

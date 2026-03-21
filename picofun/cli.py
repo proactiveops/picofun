@@ -72,6 +72,12 @@ def main(
         bool,
         typer.Option("--tf", help="Shorthand for --iac terraform"),
     ] = False,
+    format: typing.Annotated[
+        str | None,
+        typer.Option(
+            help="Spec format override (e.g., openapi3, swagger2). Auto-detected if not set."
+        ),
+    ] = None,
 ) -> None:
     """Generate lambda functions and IaC configuration to call REST APIs."""
     # Resolve IaC selection: shorthand flags take precedence over --iac
@@ -90,17 +96,15 @@ def main(
     )
 
     spec = picofun.spec.Spec(spec_file)
-    api_data = spec.parse()
+    api_spec = spec.to_api_spec(format_override=format)
 
     # Extract and select security scheme
     selected_scheme = None
     auth_scheme_type = None
     if config.auth_enabled:
         try:
-            schemes = picofun.security.extract_security_schemes(api_data)
-            global_security = picofun.security.get_global_security(api_data)
             selected_scheme = picofun.security.select_security_scheme(
-                schemes, global_security
+                api_spec.security_schemes, api_spec.global_security
             )
 
             if selected_scheme:
@@ -154,7 +158,7 @@ def main(
     lambda_generator = picofun.lambda_generator.LambdaGenerator(
         template, namespace, config, endpoint_filter
     )
-    lambdas = lambda_generator.generate(api_data)
+    lambdas = lambda_generator.generate(api_spec)
 
     if config.iac == "cdk":
         iac_generator = picofun.iac.cdk.CdkGenerator(template, namespace, config)

@@ -16,7 +16,7 @@ logger = Logger()
 
 @logger.inject_lambda_context
 def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
-    """{{ details.summary | default('') }}."""
+    """{{ summary | default('') }}."""
     properties = picorun.ApiRequestArgs(**event)
     {% if preprocessor_handler %}properties = {{preprocessor_handler}}(args){% endif %}
     url = "{{ base_url }}{{ path }}".format(**properties.path)

@@ -13,6 +13,8 @@ import requests
 import yaml
 
 import picofun.errors
+from picofun.models import ApiSpec
+from picofun.parsers import get_parser
 
 
 class SpecLoader(abc.ABC):  # pragma: no cover
@@ -177,3 +179,15 @@ class Spec:
             return YAMLSpecParser().parse(self._content)
         except picofun.errors.InvalidSpecError as e:
             raise picofun.errors.InvalidSpecError() from e
+
+    def to_api_spec(self, format_override: str | None = None) -> ApiSpec:
+        """
+        Parse the spec and convert to canonical ApiSpec IR.
+
+        :param format_override: Optional format name to force a specific parser.
+        :return: The parsed ApiSpec.
+        :raises UnsupportedSpecFormatError: If no parser can handle the spec.
+        """
+        raw = self.parse()
+        parser = get_parser(raw, format_override=format_override)
+        return parser.parse(raw)

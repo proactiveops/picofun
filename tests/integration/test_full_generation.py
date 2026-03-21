@@ -255,3 +255,110 @@ def test_regeneration_overwrites() -> None:
             content = f.read()
             assert "This should be overwritten" not in content
             assert "def preprocessor(request):" in content
+
+
+def test_generate_swagger2_auto_detect() -> None:
+    """Test full generation with auto-detected Swagger 2.0 spec."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result = runner.invoke(
+            app,
+            [
+                "testswagger",
+                "tests/fixtures/swagger2_apikey_auth.yaml",
+                "--output-dir",
+                tmpdir,
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        # Check Lambda functions were generated
+        lambdas_dir = os.path.join(tmpdir, "lambdas")
+        assert os.path.isdir(lambdas_dir)
+        lambda_files = os.listdir(lambdas_dir)
+        assert len(lambda_files) > 0
+
+        # Check auth hooks were generated (spec has apiKey auth)
+        auth_hooks_path = os.path.join(tmpdir, "layer", "auth_hooks.py")
+        assert os.path.exists(auth_hooks_path)
+
+        with open(auth_hooks_path) as f:
+            content = f.read()
+            assert "def preprocessor(request):" in content
+            assert "X-API-Key" in content
+
+        # Check Terraform output
+        main_tf_path = os.path.join(tmpdir, "main.tf")
+        assert os.path.exists(main_tf_path)
+
+        with open(main_tf_path) as f:
+            content = f.read()
+            assert "aws_ssm_parameter" in content
+            assert "credentials-api-key" in content
+
+
+def test_generate_swagger2_format_override() -> None:
+    """Test Swagger 2.0 with explicit --format override."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result = runner.invoke(
+            app,
+            [
+                "testswagger",
+                "tests/fixtures/swagger2_apikey_auth.yaml",
+                "--format",
+                "swagger2",
+                "--output-dir",
+                tmpdir,
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        lambdas_dir = os.path.join(tmpdir, "lambdas")
+        assert os.path.isdir(lambdas_dir)
+        lambda_files = os.listdir(lambdas_dir)
+        assert len(lambda_files) > 0
+
+
+def test_generate_invalid_format() -> None:
+    """Test that --format with unknown value produces clear error."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result = runner.invoke(
+            app,
+            [
+                "testbadformat",
+                "tests/fixtures/spec_bearer_auth.yaml",
+                "--format",
+                "nonexistent",
+                "--output-dir",
+                tmpdir,
+            ],
+        )
+
+        assert result.exit_code != 0
+
+
+def test_generate_swagger2_basic_auth() -> None:
+    """Test full generation with Swagger 2.0 basic auth."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result = runner.invoke(
+            app,
+            [
+                "testbasic",
+                "tests/fixtures/swagger2_basic_auth.yaml",
+                "--output-dir",
+                tmpdir,
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        # Check auth hooks generated with basic auth
+        auth_hooks_path = os.path.join(tmpdir, "layer", "auth_hooks.py")
+        assert os.path.exists(auth_hooks_path)
+
+        with open(auth_hooks_path) as f:
+            content = f.read()
+            assert "def preprocessor(request):" in content
+            # Basic auth should have base64 encoding
+            assert "base64" in content or "Basic" in content

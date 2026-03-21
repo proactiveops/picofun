@@ -2,9 +2,9 @@
 
 *There's little fun in writing boilerplate*
 
-PicoFun is a tool for generating Python based clients for OpenAPI spec files. The client for each endpoint is packaged as an AWS Lambda function. Infrastructure as Code (Terraform or AWS CDK) is also generated to deploy the clients to AWS. The generated functions are designed to be be invoked using Step Functions or the Lambda Invoke API.
+PicoFun is a tool for generating Python based API clients. The client for each endpoint is packaged as an AWS Lambda function. Infrastructure as Code (Terraform or AWS CDK) is also generated to deploy the clients to AWS. The generated functions are designed to be invoked using Step Functions or the Lambda Invoke API.
 
-**PicoFun only supports OpenAPI version 3 spec files.** Swagger files and versions of OpenAPI prior to 3 are not supported.
+PicoFun supports **OpenAPI 3.x** and **Swagger 2.0** spec files out of the box, with a pluggable parser architecture for additional formats.
 
 ## Installation
 
@@ -85,6 +85,38 @@ variables = { environment = "staging", version = "v2" }
 
 Server variables from the config override any defaults in the spec. Variables without defaults (in either spec or config) trigger a fatal error.
 
+## Supported Formats
+
+PicoFun uses a pluggable parser architecture to convert API specifications into a canonical intermediate representation. The spec format is auto-detected by default.
+
+### Built-in Parsers
+
+| Format | Detected via | `--format` value |
+|---|---|---|
+| OpenAPI 3.x | `openapi: "3.x.x"` field | `openapi3` |
+| Swagger 2.0 | `swagger: "2.0"` field | `swagger2` |
+
+### Format Override
+
+Use the `--format` CLI flag to bypass auto-detection and force a specific parser:
+
+```bash
+picofun --format swagger2 myapi spec.json
+```
+
+### Third-party Parsers
+
+Additional parsers can be registered as plugins via the `picofun.parsers` entry point group. A plugin must subclass `picofun.parsers.BaseParser` and implement `can_parse()` and `parse()` methods.
+
+Register the plugin in your package's `pyproject.toml`:
+
+```toml
+[project.entry-points."picofun.parsers"]
+myformat = "my_package.parser:MyFormatParser"
+```
+
+Once installed, the parser is automatically discovered and available for both auto-detection and the `--format` flag.
+
 ## Usage
 
 PicoFun is invoked using the `picofun` command. The minimum arguments required to invoke PicoFun are the project namespace and the OpenAPI spec file. The project namespace is used to generate the names of the generated functions and the terraform module. The OpenAPI spec file is used to generate the clients.
@@ -110,6 +142,7 @@ While the `config.toml` file is the preferred way to manage the configuration fo
   --iac          # IaC tool: "terraform" (default), "tf", or "cdk"
   --cdk          # Shorthand for --iac cdk
   --tf           # Shorthand for --iac terraform
+  --format       # Spec format override (e.g., openapi3, swagger2). Auto-detected if not set
 ```
 
 Here is an example of overriding the configuration file:
@@ -418,4 +451,17 @@ task = sfn_tasks.LambdaInvoke(
 )
 ```
 
-See `examples/cdk/` for a complete walkthrough.
+See the [Examples](#examples) section for complete walkthroughs.
+
+## Examples
+
+The `examples/` directory contains complete projects demonstrating different PicoFun configurations:
+
+| Example | API | Spec Format | IaC | Auth |
+|---|---|---|---|---|
+| [`cdk/`](examples/cdk/) | Petstore | OpenAPI 3 | CDK | None |
+| [`swagger-meraki/`](examples/swagger-meraki/) | Cisco Meraki Dashboard | Swagger 2.0 | CDK | API Key (auto-generated) |
+| [`zendesk/`](examples/zendesk/) | Zendesk | OpenAPI 3 | Terraform | Custom preprocessor (Basic Auth) |
+| [`github-app-cdk/`](examples/github-app-cdk/) | GitHub | OpenAPI 3 | CDK | Custom preprocessor (JWT token rotation) |
+
+Each example includes a `README.md` with setup and deployment instructions.

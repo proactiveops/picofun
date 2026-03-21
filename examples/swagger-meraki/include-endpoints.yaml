@@ -1,0 +1,10 @@
+paths:
+  # Device info and management
+  - path: /devices/{serial}
+    methods: [get, put]
+  # DHCP subnet configuration
+  - path: /devices/{serial}/appliance/dhcp/subnets
+    methods: [get]
+  # Appliance performance metrics
+  - path: /devices/{serial}/appliance/performance
+    methods: [get]

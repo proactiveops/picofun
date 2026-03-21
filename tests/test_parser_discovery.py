@@ -15,6 +15,7 @@ from picofun.parsers.base import (
     get_parser,
 )
 from picofun.parsers.openapi3 import OpenAPI3Parser
+from picofun.parsers.swagger2 import Swagger2Parser
 
 
 class TestDiscoverParsers:
@@ -60,28 +61,28 @@ class TestDiscoverParsers:
         """Verify a valid plugin parser is included in discovered parsers."""
         from picofun.parsers.base import BaseParser
 
-        class FakeSwaggerParser(BaseParser):
-            format_name = "swagger2"
+        class FakeGraphQLParser(BaseParser):
+            format_name = "graphql"
 
             @classmethod
             def can_parse(cls, spec_dict: dict) -> bool:
-                """Check for swagger field."""
+                """Check for graphql field."""
                 return False  # pragma: no cover
 
             def parse(self, spec_dict: dict) -> None:  # type: ignore[override]
-                """Parse a swagger spec."""
+                """Parse a graphql spec."""
                 ...
 
         plugin_ep = MagicMock()
-        plugin_ep.name = "swagger2-plugin"
-        plugin_ep.load.return_value = FakeSwaggerParser
+        plugin_ep.name = "graphql-plugin"
+        plugin_ep.load.return_value = FakeGraphQLParser
 
         monkeypatch.setattr(
             "picofun.parsers.base.importlib.metadata.entry_points",
             lambda group: [plugin_ep],
         )
         parsers = discover_parsers()
-        assert FakeSwaggerParser in parsers
+        assert FakeGraphQLParser in parsers
 
 
 class TestGetParser:
@@ -92,10 +93,20 @@ class TestGetParser:
         parser = get_parser({"openapi": "3.0.0"})
         assert isinstance(parser, OpenAPI3Parser)
 
+    def test_auto_detect_swagger2(self) -> None:
+        """Verify auto-detection returns Swagger2Parser for a Swagger 2.0 spec."""
+        parser = get_parser({"swagger": "2.0"})
+        assert isinstance(parser, Swagger2Parser)
+
     def test_format_override_openapi3(self) -> None:
         """Verify format_override selects OpenAPI3Parser."""
         parser = get_parser({}, format_override="openapi3")
         assert isinstance(parser, OpenAPI3Parser)
+
+    def test_format_override_swagger2(self) -> None:
+        """Verify format_override selects Swagger2Parser."""
+        parser = get_parser({}, format_override="swagger2")
+        assert isinstance(parser, Swagger2Parser)
 
     def test_unknown_format_override_raises(self) -> None:
         """Verify unknown format_override raises UnsupportedSpecFormatError."""
@@ -105,7 +116,7 @@ class TestGetParser:
     def test_unrecognized_spec_raises(self) -> None:
         """Verify unrecognized spec raises UnsupportedSpecFormatError."""
         with pytest.raises(UnsupportedSpecFormatError):
-            get_parser({"swagger": "2.0"})
+            get_parser({"format": "unknown"})
 
 
 @pytest.fixture(autouse=True)

@@ -1,0 +1,20 @@
+swagger: "2.0"
+info:
+  title: Test API
+  version: "1.0"
+host: api.example.com
+basePath: /v1
+schemes:
+  - https
+securityDefinitions:
+  basicAuth:
+    type: basic
+security:
+  - basicAuth: []
+paths:
+  /test:
+    get:
+      operationId: getTest
+      responses:
+        "200":
+          description: OK

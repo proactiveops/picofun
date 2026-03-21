@@ -39,8 +39,10 @@ def _ensure_builtins() -> None:
     """Lazily populate BUILTIN_PARSERS to avoid circular imports."""
     if not BUILTIN_PARSERS:
         from picofun.parsers.openapi3 import OpenAPI3Parser
+        from picofun.parsers.swagger2 import Swagger2Parser
 
         BUILTIN_PARSERS.append(OpenAPI3Parser)
+        BUILTIN_PARSERS.append(Swagger2Parser)
 
 
 def discover_parsers() -> list[type[BaseParser]]:

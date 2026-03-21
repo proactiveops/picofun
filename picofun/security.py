@@ -8,66 +8,6 @@ from picofun.errors import UnsupportedSecuritySchemeError
 from picofun.models import SecurityScheme
 
 
-def extract_security_schemes(spec: dict) -> list[SecurityScheme]:
-    """
-    Extract security schemes from an OpenAPI specification.
-
-    Parses the components.securitySchemes section of an OpenAPI spec
-    and returns a list of SecurityScheme objects.
-
-    Args:
-        spec: The OpenAPI specification as a dictionary
-
-    Returns:
-        List of SecurityScheme objects.
-        Returns empty list if no securitySchemes are defined.
-
-    """
-    components = spec.get("components", {})
-    security_schemes = components.get("securitySchemes", {})
-
-    result = []
-    for name, scheme_def in security_schemes.items():
-        scheme_type = scheme_def.get("type")
-
-        security_scheme = SecurityScheme(
-            name=name,
-            type=scheme_type,
-            param_name=scheme_def.get("name"),
-            location=scheme_def.get("in"),
-            scheme=scheme_def.get("scheme"),
-            bearer_format=scheme_def.get("bearerFormat"),
-        )
-        result.append(security_scheme)
-
-    return result
-
-
-def get_global_security(spec: dict) -> list[str]:
-    """
-    Extract the top-level security array from an OpenAPI specification.
-
-    Returns the list of security scheme names referenced in the global
-    security requirement.
-
-    Args:
-        spec: The OpenAPI specification as a dictionary
-
-    Returns:
-        List of scheme names referenced in global security.
-        Returns empty list if no security is defined.
-
-    """
-    security = spec.get("security", [])
-
-    # Each item in security is a dict with scheme names as keys
-    scheme_names = []
-    for requirement in security:
-        scheme_names.extend(requirement.keys())
-
-    return scheme_names
-
-
 def _is_supported_scheme(scheme: SecurityScheme) -> bool:
     """Check if a security scheme is supported."""
     if scheme.type == "apiKey":

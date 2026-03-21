@@ -136,20 +136,6 @@ class InvalidSpecError(Exception):
         super().__init__("The spec file isn't valid JSON or YAML")
 
 
-class MissingServerVariableError(ValueError):
-    """Exception thrown when a server variable lacks a default value."""
-
-    def __init__(self, variable: str) -> None:
-        """
-        Initialise MissingServerVariableError.
-
-        :param variable: The name of the variable missing a default value.
-        """
-        super().__init__(
-            f"Server variable '{variable}' does not have a default value in the spec and was not provided in config."
-        )
-
-
 class UnknownConfigValueError(AttributeError):
     """Exception thrown when an unknown configuration value is specified."""
 

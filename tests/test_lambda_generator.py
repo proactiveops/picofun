@@ -6,7 +6,9 @@ __license__ = "MIT"
 
 import os
 import tempfile
+from typing import Any
 
+import pydantic
 import pytest
 import yaml
 
@@ -233,6 +235,21 @@ def test_resolve_server_url_no_config() -> None:
     assert result == "https://example.com/api"
 
 
+def test_resolve_server_url_no_config_with_spec_variables() -> None:
+    """Test resolving server URL uses spec defaults when config has no server."""
+    tpl = picofun.template.Template("tests/data/templates")
+    config = picofun.config.Config()
+    generator = picofun.lambda_generator.LambdaGenerator(tpl, "", config)
+
+    server = Server(
+        url="https://{subdomain}.example.com/api",
+        variables={"subdomain": ServerVariable(default="api")},
+    )
+    result = generator._resolve_server_url(server)
+
+    assert result == "https://api.example.com/api"
+
+
 def test_resolve_server_url_with_url_override() -> None:
     """Test resolving server URL with config URL override."""
     tpl = picofun.template.Template("tests/data/templates")
@@ -311,8 +328,9 @@ def test_resolve_server_url_unknown_variable() -> None:
 
 def test_resolve_server_url_missing_default() -> None:
     """Test that ServerVariable without default fails at model construction."""
-    with pytest.raises(Exception):
-        ServerVariable(description="The subdomain")
+    kwargs: dict[str, Any] = {"description": "The subdomain"}
+    with pytest.raises(pydantic.ValidationError):
+        ServerVariable(**kwargs)
 
 
 def test_resolve_server_url_no_variables_in_spec() -> None:

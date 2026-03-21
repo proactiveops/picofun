@@ -7,7 +7,6 @@ __license__ = "MIT"
 import hashlib
 import logging
 import os
-import typing
 
 import black
 
@@ -57,7 +56,9 @@ class LambdaGenerator:
 
         return lambda_name
 
-    def _validate_config_variables(self, spec_variables: dict[str, ServerVariable]) -> None:
+    def _validate_config_variables(
+        self, spec_variables: dict[str, ServerVariable]
+    ) -> None:
         """
         Validate that config variables exist in spec.
 

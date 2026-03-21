@@ -98,7 +98,9 @@ class TestPathMatching:
         ef = self._create_filter([{"path": "/users/**"}])
         assert ef.is_included(Endpoint(path="/users/123", method="get")) is True
         assert ef.is_included(Endpoint(path="/users/123/orders", method="get")) is True
-        assert ef.is_included(Endpoint(path="/users/123/orders/456", method="get")) is True
+        assert (
+            ef.is_included(Endpoint(path="/users/123/orders/456", method="get")) is True
+        )
         assert ef.is_included(Endpoint(path="/users", method="get")) is False
 
     def test_method_filter(self) -> None:
@@ -140,9 +142,24 @@ class TestOperationIdMatching:
     def test_operation_id_match(self) -> None:
         """Matching operationId includes endpoint."""
         ef = self._create_filter(["getUser", "createUser"])
-        assert ef.is_included(Endpoint(path="/users", method="get", operation_id="getUser")) is True
-        assert ef.is_included(Endpoint(path="/users", method="post", operation_id="createUser")) is True
-        assert ef.is_included(Endpoint(path="/users", method="delete", operation_id="deleteUser")) is False
+        assert (
+            ef.is_included(
+                Endpoint(path="/users", method="get", operation_id="getUser")
+            )
+            is True
+        )
+        assert (
+            ef.is_included(
+                Endpoint(path="/users", method="post", operation_id="createUser")
+            )
+            is True
+        )
+        assert (
+            ef.is_included(
+                Endpoint(path="/users", method="delete", operation_id="deleteUser")
+            )
+            is False
+        )
 
     def test_no_operation_id_in_details(self) -> None:
         """Endpoint without operationId doesn't match operationId filter."""
@@ -166,14 +183,27 @@ class TestTagMatching:
     def test_tag_match(self) -> None:
         """Matching tag includes endpoint."""
         ef = self._create_filter(["public", "v2"])
-        assert ef.is_included(Endpoint(path="/users", method="get", tags=["public"])) is True
-        assert ef.is_included(Endpoint(path="/users", method="get", tags=["v2"])) is True
-        assert ef.is_included(Endpoint(path="/users", method="get", tags=["internal"])) is False
+        assert (
+            ef.is_included(Endpoint(path="/users", method="get", tags=["public"]))
+            is True
+        )
+        assert (
+            ef.is_included(Endpoint(path="/users", method="get", tags=["v2"])) is True
+        )
+        assert (
+            ef.is_included(Endpoint(path="/users", method="get", tags=["internal"]))
+            is False
+        )
 
     def test_multiple_tags_any_match(self) -> None:
         """Any matching tag includes the endpoint."""
         ef = self._create_filter(["public"])
-        assert ef.is_included(Endpoint(path="/users", method="get", tags=["internal", "public"])) is True
+        assert (
+            ef.is_included(
+                Endpoint(path="/users", method="get", tags=["internal", "public"])
+            )
+            is True
+        )
 
     def test_no_tags_in_details(self) -> None:
         """Endpoint without tags doesn't match tag filter."""
@@ -197,7 +227,12 @@ class TestOrLogic:
         # Matches path
         assert ef.is_included(Endpoint(path="/users", method="get")) is True
         # Matches operationId
-        assert ef.is_included(Endpoint(path="/orders", method="get", operation_id="getOrders")) is True
+        assert (
+            ef.is_included(
+                Endpoint(path="/orders", method="get", operation_id="getOrders")
+            )
+            is True
+        )
         # Matches neither
         assert ef.is_included(Endpoint(path="/products", method="get")) is False
 
@@ -221,8 +256,19 @@ class TestOrLogic:
         # Matches path only
         assert ef.is_included(Endpoint(path="/users", method="get")) is True
         # Matches operationId only
-        assert ef.is_included(Endpoint(path="/orders", method="get", operation_id="getOrders")) is True
+        assert (
+            ef.is_included(
+                Endpoint(path="/orders", method="get", operation_id="getOrders")
+            )
+            is True
+        )
         # Matches tag only
-        assert ef.is_included(Endpoint(path="/products", method="get", tags=["public"])) is True
+        assert (
+            ef.is_included(Endpoint(path="/products", method="get", tags=["public"]))
+            is True
+        )
         # Matches nothing
-        assert ef.is_included(Endpoint(path="/internal", method="get", tags=["internal"])) is False
+        assert (
+            ef.is_included(Endpoint(path="/internal", method="get", tags=["internal"]))
+            is False
+        )

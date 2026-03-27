@@ -9,6 +9,7 @@ from picofun.errors import (
     InvalidParserPluginError,
     UnsupportedSpecFormatError,
 )
+from picofun.models import ApiSpec
 from picofun.parsers.base import (
     BUILTIN_PARSERS,
     discover_parsers,
@@ -69,9 +70,9 @@ class TestDiscoverParsers:
                 """Check for graphql field."""
                 return False  # pragma: no cover
 
-            def parse(self, spec_dict: dict) -> None:  # type: ignore[override]
+            def parse(self, spec_dict: dict) -> ApiSpec:
                 """Parse a graphql spec."""
-                ...
+                raise NotImplementedError  # pragma: no cover
 
         plugin_ep = MagicMock()
         plugin_ep.name = "graphql-plugin"

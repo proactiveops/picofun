@@ -52,7 +52,7 @@ def test_api_spec_all_fields() -> None:
 def test_api_spec_missing_source_format_raises() -> None:
     """Constructing ApiSpec without source_format raises ValidationError."""
     with pytest.raises(ValidationError):
-        ApiSpec()  # type: ignore[call-arg]
+        ApiSpec.model_validate({})
 
 
 def test_api_spec_json_round_trip() -> None:

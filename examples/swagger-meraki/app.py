@@ -1,6 +1,6 @@
 """Minimal CDK app demonstrating the PicoFun-generated construct for the Meraki API."""
 
-import aws_cdk as cdk  # noqa: I001
+import aws_cdk as cdk
 from constructs import Construct
 
 from output.construct import (

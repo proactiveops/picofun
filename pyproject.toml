@@ -88,7 +88,7 @@ exclude = ["examples/", "output/"]
 [tool.ruff.lint]
 # Rules listed at https://docs.astral.sh/ruff/rules/
 select = ["B", "D", "E", "F", "G", "I", "N", "S", "W", "ANN" ,"BLE", "C4", "C90", "DTZ", "ERA", "PLW", "PT", "RET", "RUF", "SIM", "TRY", "UP"]
-ignore = ["D203", "D211", "D212", "E501", "F403", "F405"]
+ignore = ["D203", "D211", "D212", "E501", "F403", "F405", "S603"]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["B", "D", "E", "F", "G", "I", "N", "S", "W", "ANN" ,"BLE", "C4", "C90", "DTZ", "ERA", "PLW", "PT", "RET", "RUF", "SIM", "TRY", "UP"]

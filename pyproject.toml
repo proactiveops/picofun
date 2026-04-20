@@ -10,7 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
   "black==26.3.1", # ruff can't be invoked from code without shelling out
   "jinja2==3.1.6",
-  "pydantic==2.12.5",
+  "pydantic==2.13.2",
   "PyYAML==6.0.3",
   "requests==2.33.0",
   "tomlkit==0.14.0",

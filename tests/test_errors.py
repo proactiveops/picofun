@@ -32,7 +32,18 @@ def test_download_spec_http_error() -> None:
 
     exception = requests.exceptions.HTTPError(response=response)
 
-    with pytest.raises(picofun.errors.DownloadSpecHTTPError):
+    with pytest.raises(picofun.errors.DownloadSpecHTTPError, match="HTTP Error 404"):
+        raise picofun.errors.DownloadSpecHTTPError(exception)
+
+
+def test_download_spec_http_error_none_response() -> None:
+    """Test DownloadSpecHTTPError."""
+    response = None
+    exception = requests.exceptions.HTTPError(response=response)
+
+    with pytest.raises(
+        picofun.errors.DownloadSpecHTTPError, match="HTTP Error Unknown: Unknown"
+    ):
         raise picofun.errors.DownloadSpecHTTPError(exception)
 
 

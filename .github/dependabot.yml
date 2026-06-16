@@ -15,8 +15,19 @@ updates:
     cooldown:
       default-days: 1
     groups:
+      boto:
+        patterns:
+          - "boto*"
+      cdk:
+        patterns:
+          - "aws-cdk-*"
+          - "constructs*"
+      powertools:
+        patterns:
+          - "aws-lambda-powertools*"
       pytest:
         patterns:
+          - "coverage*"
           - "pytest*"
       qa:
         patterns:

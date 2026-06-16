@@ -42,9 +42,13 @@ class DownloadSpecHTTPError(Exception):
 
         :param arg: The HTTP error thrown.
         """
+        if arg.response is None:
+            return super().__init__("HTTP Error Unknown: Unknown")
+
         super().__init__(
             f"HTTP Error {arg.response.status_code}: {arg.response.reason}"
         )
+        return None
 
 
 class EndpointFilterEmptyFileError(Exception):

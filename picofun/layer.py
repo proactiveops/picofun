@@ -13,7 +13,7 @@ import picofun.pyproject_manager
 
 logger = logging.getLogger(__name__)
 
-PICORUN_VERSION = "0.2.1"
+PICORUN_VERSION = "0.8.1"
 
 
 class Layer:

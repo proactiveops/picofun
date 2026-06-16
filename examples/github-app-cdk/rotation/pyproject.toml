@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "GitHub App installation token rotation Lambda"
 requires-python = ">=3.13"
 dependencies = [
-    "PyJWT[crypto]>=2.9,<3.0",
+    "PyJWT[crypto]~=2.13",
 ]
 
 [build-system]

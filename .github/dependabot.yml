@@ -2,7 +2,13 @@ version: 2
 
 updates:
   - package-ecosystem: uv
-    directory: "/"
+    directories:
+      - "/"
+      - "/examples/cdk"
+      - "/examples/swagger-meraki"
+      - "/examples/github-app-cdk"
+      - "/examples/github-app-cdk/helpers"
+      - "/examples/github-app-cdk/rotation"
     schedule:
       interval: daily
       time: "02:00"
@@ -22,7 +28,9 @@ updates:
     open-pull-requests-limit: 10
 
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/examples/zendesk"
     schedule:
       interval: "daily"
       time: "03:00"

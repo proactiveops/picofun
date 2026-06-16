@@ -17,7 +17,7 @@ def test_load() -> None:
 
     assert typing.cast(dict[str, typing.Any], pyproject._toml["project"])[
         "dependencies"
-    ] == ["picorun==0.1.0"]
+    ] == ["picorun==0.8.1"]
 
 
 def test_load_no_file() -> None:
@@ -39,7 +39,7 @@ def test_update() -> None:
 
     assert typing.cast(dict[str, typing.Any], pyproject._toml["project"])[
         "dependencies"
-    ] == ["picorun==0.1.0"]
+    ] == ["picorun==0.8.1"]
 
 
 def test_update_add() -> None:

@@ -4,10 +4,12 @@ on:
   pull_request:
     paths:
       - '.github/**'
+      - 'examples/**/.github/workflows/**'
   push:
     branches: [main]
     paths:
       - '.github/**'
+      - 'examples/**/.github/workflows/**'
 
 permissions: {}
 

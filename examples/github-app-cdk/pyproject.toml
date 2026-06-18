@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "PicoFun CDK example using the GitHub API with GitHub App authentication"
 requires-python = ">=3.13"
 dependencies = [
-    "aws-cdk-lib==2.259.0",
+    "aws-cdk-lib==2.260.0",
     "constructs==10.6.0",
 ]
 

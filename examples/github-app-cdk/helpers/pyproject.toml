@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Lambda layer dependencies for GitHub App authentication"
 requires-python = ">=3.13"
 dependencies = [
-    "aws-lambda-powertools~=3.29",
+    "aws-lambda-powertools~=3.30",
 ]
 
 [build-system]

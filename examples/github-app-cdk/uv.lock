@@ -54,7 +54,7 @@ wheels = [
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.259.0"
+version = "2.261.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aws-cdk-asset-awscli-v1" },
@@ -65,9 +65,9 @@ dependencies = [
     { name = "publication" },
     { name = "typeguard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/91/79/ed16d23e303eca70497b51bdf933310bbdafeffe5536977e39569b4aa7aa/aws_cdk_lib-2.259.0.tar.gz", hash = "sha256:5481f23b51dd771146c747d54e5d442f25a346a78c60077bd21b7d968af898e7", size = 50804111, upload-time = "2026-06-12T09:44:18.532Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4d/e0/cff866d35139cecb0ae9797d9fc7f99100d6ad7adf1f784ea7dbe01669f1/aws_cdk_lib-2.261.0.tar.gz", hash = "sha256:a48b24f09307b2fb7638b0c28cbdc8f722fab1bf0c3ed65b6319fffc9c48927d", size = 50800037, upload-time = "2026-07-02T16:32:58.587Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/ff/93ea3e57b13a22454554d1d1934b3425e52fbda28179aa8bb6cf9d0ac635/aws_cdk_lib-2.259.0-py3-none-any.whl", hash = "sha256:4ea916f3673bd372d5e5a7bf84eb5bfb20c171b74a02c14ec8af2620441457a3", size = 51493679, upload-time = "2026-06-12T09:43:38.462Z" },
+    { url = "https://files.pythonhosted.org/packages/56/44/d9a7e7530fb37db973b7df6bce6da424dfbb032ed1b50951334600e5abcd/aws_cdk_lib-2.261.0-py3-none-any.whl", hash = "sha256:a90bea2a90e57eb4335609e64accc22defad1e3735a69cfc74f8122ce032970f", size = 51494763, upload-time = "2026-07-02T16:32:16.719Z" },
 ]
 
 [[package]]
@@ -377,7 +377,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aws-cdk-lib", specifier = "==2.259.0" },
+    { name = "aws-cdk-lib", specifier = "==2.261.0" },
     { name = "constructs", specifier = "==10.6.0" },
 ]
 

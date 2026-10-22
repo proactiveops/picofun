@@ -13,7 +13,7 @@ dependencies = [
   "pydantic==2.14.1",
   "PyYAML==6.0.3",
   "requests==2.34.2",
-  "tomlkit==0.15.1",
+  "tomlkit==0.15.2",
   "typer==0.27.3",
 ]
 

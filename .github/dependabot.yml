@@ -9,6 +9,7 @@ updates:
       - "/examples/github-app-cdk"
       - "/examples/github-app-cdk/helpers"
       - "/examples/github-app-cdk/rotation"
+      - "/tests/data"
     schedule:
       interval: daily
       time: "02:00"

@@ -446,7 +446,8 @@ my_api = MyapiFunctions(self, "MyApiFunctions")
 
 # Wire into Step Functions
 task = sfn_tasks.LambdaInvoke(
-    self, "GetUsers",
+    self,
+    "GetUsers",
     lambda_function=my_api.functions["get_users"],
 )
 ```

@@ -49,7 +49,8 @@ petstore = PetstoreFunctions(self, "PetstoreFunctions")
 
 # Wire a specific function into a Step Function task
 get_pet_task = sfn_tasks.LambdaInvoke(
-    self, "GetPet",
+    self,
+    "GetPet",
     lambda_function=petstore.functions["get_pet_pet_id"],
 )
 ```

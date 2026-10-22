@@ -10,7 +10,7 @@ from typing import cast
 from picofun.errors import CircularRefError, RefPathNotFoundError
 
 type JsonValue = (
-    str | int | float | bool | None | dict[str, JsonValue] | list[JsonValue]
+    str | int | float | bool | dict[str, JsonValue] | list[JsonValue] | None
 )
 
 

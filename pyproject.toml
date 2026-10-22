@@ -34,7 +34,7 @@ dev = [
 ]
 
 build = [
-  "build==1.6.0",
+  "build==1.6.1",
   "twine==7.0.0",
 ]
 

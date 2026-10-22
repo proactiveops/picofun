@@ -51,7 +51,8 @@ meraki = MerakiFunctions(self, "MerakiFunctions")
 
 # Wire a specific function into a Step Function task
 get_device_task = sfn_tasks.LambdaInvoke(
-    self, "GetDevice",
+    self,
+    "GetDevice",
     lambda_function=meraki.functions["get_devices_serial"],
 )
 ```

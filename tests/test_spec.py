@@ -4,6 +4,8 @@ __author__ = "Dave Hall <skwashd@gmail.com>"
 __copyright__ = "Copyright 2023 - 2026, Dave Hall https://proactiveops.io"
 __license__ = "MIT"
 
+import inspect
+
 import pytest
 import requests
 
@@ -50,8 +52,8 @@ def mock_requests_get_spec(*args: object, **kwargs: object) -> object:
 
 def test_spec_parser() -> None:
     """Test the SpecParser interface."""
-    with pytest.raises(TypeError):
-        picofun.spec.SpecParser()
+    assert inspect.isabstract(picofun.spec.SpecParser)
+    assert picofun.spec.SpecParser.__abstractmethods__ == frozenset({"parse"})
 
 
 def test_json_spec_parser() -> None:

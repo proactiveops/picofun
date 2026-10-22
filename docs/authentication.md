@@ -118,11 +118,13 @@ PicoFun will:
 import os
 from aws_lambda_powertools.utilities import parameters
 
+
 def get_credentials(scheme_type):
     """Retrieve credentials from SSM Parameter Store."""
     ttl = int(os.environ.get("PICORUN_CREDENTIALS_TTL", "300"))
     param_name = f"/picofun/myapi/credentials-{scheme_type}"
     return parameters.get_parameter(param_name, transform="json", max_age=ttl)
+
 
 def preprocessor(request):
     """Add authentication to the request."""
@@ -427,6 +429,7 @@ If you currently use a custom preprocessor for authentication:
 # custom_auth.py
 import os
 from aws_lambda_powertools.utilities import parameters
+
 
 def preprocessor(request):
     token = parameters.get_parameter("/myapp/api-token")

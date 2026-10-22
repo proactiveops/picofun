@@ -112,7 +112,8 @@ github_api = GithubappFunctions(self, "GithubappFunctions")
 
 # Wire a specific function into a Step Function task
 get_repo_task = sfn_tasks.LambdaInvoke(
-    self, "GetRepo",
+    self,
+    "GetRepo",
     lambda_function=github_api.functions["get_repos_owner_repo"],
 )
 ```

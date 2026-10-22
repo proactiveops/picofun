@@ -86,18 +86,18 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "picorun", specifier = "==0.8.1" }]
+requires-dist = [{ name = "picorun", specifier = "==0.8.2" }]
 
 [[package]]
 name = "picorun"
-version = "0.8.1"
+version = "0.8.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d8/77/05f2485bcef9bd8d5dbe4f7ccebff1321c8ba51375fc00701259e9e66403/picorun-0.8.1.tar.gz", hash = "sha256:6dc798cd410a894001eedc4d5994407dc6f436b61ae8e491a60be4b4dff72bb9", size = 35581, upload-time = "2026-06-16T06:41:58.852Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ea/eb/ea0d8f34c7dfaccddb40b4babb0776e091d73c7e101803dfdc2c51bcd9c0/picorun-0.8.2.tar.gz", hash = "sha256:7ea7012008e11db4a82c7f3a4f6b31efa1d6612b04101b46eb695deb010cb286", size = 37029, upload-time = "2026-10-22T05:58:23.929Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/87/2d/af5eae50ec957fc8ef9d45cea31a158b63c759b6ec3291dd9aae3e53d0c0/picorun-0.8.1-py3-none-any.whl", hash = "sha256:b2a28f48fa8124af234fe2f3d70b96f366d7ac73b713f5141510394c9dd0bbca", size = 4255, upload-time = "2026-06-16T06:41:57.785Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/63/1e8263fad7aba34c1bea529e1cd926790126cf9d1c8795c4201b2758caae/picorun-0.8.2-py3-none-any.whl", hash = "sha256:e4ac8779fde0e0abd47f010c37e8b3eb6475f48c132b65091952732424f37433", size = 4252, upload-time = "2026-10-22T05:58:22.675Z" },
 ]
 
 [[package]]

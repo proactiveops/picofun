@@ -29,8 +29,8 @@ dev = [
   "coverage==7.16.2",
   "pytest==9.1.1",
   "pytest-mock==3.17.0",
-  "ruff==0.17.1",
-  "ty==0.0.90",
+  "ruff==0.17.3",
+  "ty==0.0.92",
 ]
 
 build = [

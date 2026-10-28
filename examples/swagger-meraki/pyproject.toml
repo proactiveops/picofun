@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "PicoFun CDK example using the Cisco Meraki Dashboard API (Swagger 2.0)"
 requires-python = ">=3.13"
 dependencies = [
-    "aws-cdk-lib==2.274.0",
+    "aws-cdk-lib==2.275.0",
     "constructs==10.8.1",
 ]
 

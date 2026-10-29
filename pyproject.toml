@@ -26,8 +26,8 @@ dynamic = ["version"]
 
 [dependency-groups]
 dev = [
-  "coverage==7.16.2",
-  "pytest==9.1.1",
+  "coverage==7.17.0",
+  "pytest==9.2.0",
   "pytest-mock==3.17.0",
   "ruff==0.17.1",
   "ty==0.0.90",

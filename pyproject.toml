@@ -14,7 +14,7 @@ dependencies = [
   "PyYAML==6.0.3",
   "requests==2.34.2",
   "tomlkit==0.15.2",
-  "typer==0.27.3",
+  "typer==0.28.0",
 ]
 
 license = "BSD-3-Clause"
@@ -29,8 +29,8 @@ dev = [
   "coverage==7.16.2",
   "pytest==9.1.1",
   "pytest-mock==3.17.0",
-  "ruff==0.17.1",
-  "ty==0.0.90",
+  "ruff==0.17.4",
+  "ty==0.0.99",
 ]
 
 build = [
